@@ -1,8 +1,9 @@
 import { text, integer, timestamp, boolean } from "drizzle-orm/pg-core";
+import { pgTable } from "drizzle-orm/pg-core";
 
 import { tushSchema } from "./pg-schema";
 
-export const user = tushSchema.table("user", {
+export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
@@ -12,7 +13,7 @@ export const user = tushSchema.table("user", {
   updatedAt: timestamp("updatedAt").notNull(),
 });
 
-export const session = tushSchema.table("session", {
+export const session = pgTable("session", {
   id: text("id").primaryKey(),
   expiresAt: timestamp("expiresAt").notNull(),
   token: text("token").notNull().unique(),
@@ -25,7 +26,7 @@ export const session = tushSchema.table("session", {
     .references(() => user.id),
 });
 
-export const account = tushSchema.table("account", {
+export const account = pgTable("account", {
   id: text("id").primaryKey(),
   accountId: text("accountId").notNull(),
   providerId: text("providerId").notNull(),
@@ -43,7 +44,7 @@ export const account = tushSchema.table("account", {
   updatedAt: timestamp("updatedAt").notNull(),
 });
 
-export const verification = tushSchema.table("verification", {
+export const verification = pgTable("verification", {
   id: text("id").primaryKey(),
   identifier: text("identifier").notNull(),
   value: text("value").notNull(),

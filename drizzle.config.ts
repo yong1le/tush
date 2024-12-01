@@ -10,5 +10,4 @@ export default {
     user: env.DATABASE_USER,
     password: env.DATABASE_PASSWORD,
   },
-  schemaFilter: env.DATABASE_SCHEMA,
 } satisfies Config;
