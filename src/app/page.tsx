@@ -1,9 +1,15 @@
-import SignUp from "./_components/test-signup";
+import { signIn } from "~/server/auth";
 
 export default async function Home() {
+  const signInGithub = async () => {
+    "use server";
+    await signIn("github");
+  };
   return (
     <div>
-      <SignUp />
+      <form action={signInGithub}>
+        <button type="submit">Signin</button>
+      </form>
     </div>
   );
 }
