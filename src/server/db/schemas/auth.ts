@@ -1,8 +1,6 @@
 import { text, integer, timestamp, boolean } from "drizzle-orm/pg-core";
 import { pgTable } from "drizzle-orm/pg-core";
 
-import { tushSchema } from "./pg-schema";
-
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
   name: text("name").notNull(),
