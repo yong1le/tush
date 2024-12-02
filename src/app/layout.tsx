@@ -2,6 +2,7 @@ import "~/styles/globals.css";
 
 import { GeistSans } from "geist/font/sans";
 import { type Metadata } from "next";
+import Header from "./_components/header";
 
 export const metadata: Metadata = {
   title: "Tush",
@@ -13,8 +14,14 @@ export default function RootLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <html lang="en" className={`${GeistSans.variable}`}>
-      <body>{children}</body>
+    <html
+      lang="en"
+      className={`${GeistSans.variable} bg-base-light text-base-dark dark:bg-base-dark dark:text-base-light`}
+    >
+      <body>
+        <Header />
+        <div>{children}</div>
+      </body>
     </html>
   );
 }

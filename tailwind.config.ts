@@ -19,12 +19,16 @@ export default {
           dark: colors.lime["600"],
         },
         muted: {
-          light: colors.slate["200"],
-          dark: colors.slate["800"],
+          light: colors.gray["600"],
+          dark: colors.gray["500"],
         },
         base: {
           light: colors.slate["50"],
-          dark: colors.slate["700"],
+          dark: colors.slate["900"],
+        },
+        surface: {
+          light: colors.slate["200"],
+          dark: colors.slate["950"],
         },
         info: {
           light: colors.sky["300"],
