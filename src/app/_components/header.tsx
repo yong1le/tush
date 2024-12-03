@@ -33,7 +33,7 @@ export default function Header() {
 
       <Popover className="relative">
         <PopoverButton>
-          <EllipsisVertical className="text-muted-light dark:text-muted-dark" />
+          <EllipsisVertical className="text-neutral-light dark:text-neutral-dark" />
         </PopoverButton>
         <PopoverBackdrop className="fixed inset-0 backdrop-blur-xl" />
         <PopoverPanel
@@ -42,13 +42,13 @@ export default function Header() {
             padding: 10,
           }}
           transition
-          className={`flex w-72 origin-top flex-row items-start justify-between rounded-xl p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 dark:bg-surface-dark`}
+          className={`flex w-72 origin-top flex-row items-start justify-between rounded-xl bg-secondary-light/30 p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 dark:bg-secondary-dark/70`}
         >
           <div className="flex flex-col gap-5">
             {links.map(({ name, href }, i) => (
               <a
                 href={href}
-                className="font-bold text-muted-light dark:text-muted-dark"
+                className="font-bold text-neutral-light dark:text-neutral-dark"
                 key={i}
               >
                 {name}
@@ -56,7 +56,7 @@ export default function Header() {
             ))}
           </div>
           <CloseButton>
-            <X className="text-muted-light dark:text-muted-dark" />
+            <X className="text-neutral-light dark:text-neutral-dark" />
           </CloseButton>
         </PopoverPanel>
       </Popover>

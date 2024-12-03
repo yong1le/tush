@@ -16,7 +16,7 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${GeistSans.variable} bg-base-light text-base-dark dark:bg-base-dark dark:text-base-light`}
+      className={`${GeistSans.variable} bg-base-light text-primary-light dark:bg-base-dark dark:text-primary-dark`}
     >
       <body>
         <Header />

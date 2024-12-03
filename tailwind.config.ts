@@ -1,51 +1,44 @@
 import { type Config } from "tailwindcss";
-import colors from "tailwindcss/colors";
 
 export default {
   content: ["./src/**/*.tsx"],
   theme: {
-    extend: {
-      colors: {
-        primary: {
-          light: colors.blue["300"],
-          dark: colors.blue["600"],
-        },
-        secondary: {
-          light: colors.fuchsia["300"],
-          dark: colors.fuchsia["600"],
-        },
-        accent: {
-          light: colors.lime["400"],
-          dark: colors.lime["600"],
-        },
-        muted: {
-          light: colors.gray["600"],
-          dark: colors.gray["500"],
-        },
-        base: {
-          light: colors.slate["50"],
-          dark: colors.slate["900"],
-        },
-        surface: {
-          light: colors.slate["200"],
-          dark: colors.slate["950"],
-        },
-        info: {
-          light: colors.sky["300"],
-          dark: colors.sky["600"],
-        },
-        success: {
-          light: colors.emerald["300"],
-          dark: colors.emerald["600"],
-        },
-        warning: {
-          light: colors.amber["300"],
-          dark: colors.amber["600"],
-        },
-        error: {
-          light: colors.red["300"],
-          dark: colors.red["600"],
-        },
+    colors: {
+      primary: {
+        light: "#202124",
+        dark: "#f5f5f5",
+      },
+      secondary: {
+        light: "#D1D5DB",
+        dark: "#1f1f1f",
+      },
+      accent: {
+        light: "#A0A0A0",
+        dark: "#6B7280",
+      },
+      neutral: {
+        light: "#4B5563",
+        dark: "#6B7280",
+      },
+      base: {
+        light: "#F8F8F8",
+        dark: "#121212",
+      },
+      info: {
+        light: "#3ABFF8",
+        dark: "#0EA5E9",
+      },
+      success: {
+        light: "#22C55E",
+        dark: "#16A34A",
+      },
+      warning: {
+        light: "#FACC15",
+        dark: "#F59E0B",
+      },
+      error: {
+        light: "#EF4444",
+        dark: "#DC2626",
       },
     },
   },
