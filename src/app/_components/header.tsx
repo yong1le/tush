@@ -28,7 +28,7 @@ export default function Header() {
   ];
 
   return (
-    <nav className="flex flex-row items-end justify-between px-4 py-2">
+    <div className="flex flex-row items-end justify-between px-4 py-2">
       <h2 className="text-2xl font-bold">tush</h2>
 
       <Popover className="relative">
@@ -60,6 +60,6 @@ export default function Header() {
           </CloseButton>
         </PopoverPanel>
       </Popover>
-    </nav>
+    </div>
   );
 }
