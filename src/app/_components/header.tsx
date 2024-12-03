@@ -42,7 +42,7 @@ export default function Header() {
             padding: 10,
           }}
           transition
-          className={`flex w-72 origin-top flex-row items-start justify-between rounded-xl bg-secondary-light/30 p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 dark:bg-secondary-dark/70`}
+          className={`flex w-72 origin-top flex-row items-start justify-between rounded-xl bg-secondary-light/60 p-5 transition duration-200 ease-out data-[closed]:scale-95 data-[closed]:opacity-0 dark:bg-secondary-dark/70`}
         >
           <div className="flex flex-col gap-5">
             {links.map(({ name, href }, i) => (
