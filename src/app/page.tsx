@@ -9,10 +9,10 @@ export default function Home() {
         </h1>
 
         <Button
-          className="rounded-xl bg-info-light px-4 py-2 transition-transform data-[hover]:scale-105
+          className="rounded-xl bg-info-light px-4 py-6 transition-transform data-[hover]:scale-105
             md:w-[400px] dark:bg-info-dark"
         >
-          Get Started
+          <p className="text-xl">Get Started</p>
         </Button>
       </div>
     </div>
