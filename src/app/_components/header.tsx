@@ -38,7 +38,7 @@ export default function Header() {
           <PopoverButton>
             <EllipsisVertical className="text-neutral-light dark:text-neutral-dark" />
           </PopoverButton>
-          <PopoverBackdrop className="fixed inset-0 backdrop-blur-xl" />
+          <PopoverBackdrop className="fixed inset-0 backdrop-blur bg-black/20" />
           <PopoverPanel
             anchor={{
               to: "bottom",
@@ -46,8 +46,8 @@ export default function Header() {
             }}
             transition
             className={`flex w-72 origin-top flex-row items-start justify-between rounded-xl
-              bg-secondary-light/60 p-5 transition duration-200 ease-out
-              data-[closed]:scale-95 data-[closed]:opacity-0 dark:bg-secondary-dark/70`}
+              bg-secondary-light/80 p-5 transition duration-200 ease-out
+              data-[closed]:scale-95 data-[closed]:opacity-0 dark:bg-secondary-dark/90`}
           >
             <div className="flex flex-col gap-5">
               {links.map(({ name, href }, i) => (

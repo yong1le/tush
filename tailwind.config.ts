@@ -1,4 +1,5 @@
 import { type Config } from "tailwindcss";
+import colors from "tailwindcss/colors";
 
 export default {
   content: ["./src/**/*.tsx"],
@@ -7,40 +8,36 @@ export default {
     extend: {
       colors: {
         primary: {
-          light: "#202124",
-          dark: "#f5f5f5",
+          light: colors.slate["900"],
+          dark: colors.slate["50"],
         },
         secondary: {
-          light: "#D1D5DB",
-          dark: "#1f1f1f",
-        },
-        accent: {
-          light: "#A0A0A0",
-          dark: "#6B7280",
+          light: colors.slate["200"],
+          dark: colors.slate["700"],
         },
         neutral: {
-          light: "#4B5563",
-          dark: "#6B7280",
+          light: colors.neutral["500"],
+          dark: colors.neutral["400"],
         },
         base: {
-          light: "#F8F8F8",
-          dark: "#000000",
+          light: colors.slate["50"],
+          dark: colors.slate["900"],
         },
         info: {
-          light: "#3ABFF8",
-          dark: "#0EA5E9",
+          light: colors.blue["300"],
+          dark: colors.blue["500"],
         },
         success: {
-          light: "#22C55E",
-          dark: "#16A34A",
+          light: colors.emerald["300"],
+          dark: colors.emerald["500"],
         },
         warning: {
-          light: "#FACC15",
-          dark: "#F59E0B",
+          light: colors.amber["300"],
+          dark: colors.amber["500"],
         },
         error: {
-          light: "#EF4444",
-          dark: "#DC2626",
+          light: colors.red["300"],
+          dark: colors.red["500"],
         },
       },
     },

@@ -8,7 +8,10 @@ export default function Home() {
           Create Perfect Laptop Mockups from Your Images
         </h1>
 
-        <Button className="rounded-xl bg-info-light px-4 py-2 transition-transform data-[hover]:scale-105 md:w-[400px] dark:bg-info-dark">
+        <Button
+          className="rounded-xl bg-info-light px-4 py-2 transition-transform data-[hover]:scale-105
+            md:w-[400px] dark:bg-info-dark"
+        >
           Get Started
         </Button>
       </div>

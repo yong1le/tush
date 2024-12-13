@@ -1,31 +1,26 @@
 "use client";
 
 import { Switch } from "@headlessui/react";
+import { useTheme } from "next-themes";
 import { useEffect, useState } from "react";
-import { getTheme, setTheme } from "../_lib/theme-switcher";
 
 const ThemeSwitch = () => {
-  const [enabled, setEnabled] = useState(false);
-
-  useEffect(() => {
-    if (getTheme() == "dark") {
-      setEnabled(true);
-      setTheme("dark");
-    }
-  }, []);
+  const [mounted, setMounted] = useState(false);
+  const { resolvedTheme, setTheme } = useTheme();
 
   const changeTheme = () => {
-    if (enabled) {
-      setTheme("light");
-    } else {
-      setTheme("dark");
-    }
-
-    setEnabled(!enabled);
+    setTheme(resolvedTheme === "dark" ? "light" : "dark");
   };
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
+
   return (
     <Switch
-      checked={enabled}
+      checked={resolvedTheme === "dark"}
       onChange={changeTheme}
       className="group inline-flex h-6 w-11 items-center rounded-full bg-secondary-light
         transition data-[checked]:bg-secondary-dark"
