@@ -1,4 +1,6 @@
 import { Button } from "@headlessui/react";
+import Link from "next/link";
+import ThemeSwitch from "~/app/_components/theme-switch";
 
 export default function Home() {
   return (
@@ -10,10 +12,15 @@ export default function Home() {
 
         <Button
           className="rounded-xl bg-info-light px-4 py-6 transition-transform data-[hover]:scale-105
-            md:w-[400px] dark:bg-info-dark"
+            md:w-[400px] dark:bg-info-dark shadow-xl dark:shadow-secondary-dark/80"
         >
-          <p className="text-xl">Get Started</p>
+          <Link className="text-xl" href="/dashboard">
+            Get Started
+          </Link>
         </Button>
+      </div>
+      <div className="absolute right-10 bottom-10">
+        <ThemeSwitch />
       </div>
     </div>
   );

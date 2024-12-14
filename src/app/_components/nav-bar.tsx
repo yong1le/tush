@@ -8,22 +8,18 @@ import {
 import { EllipsisVertical, X } from "lucide-react";
 import ThemeSwitch from "./theme-switch";
 
-export default function Header() {
+export default function Navbar() {
   const links = [
     {
-      name: "Get Started",
+      name: "Create New",
       href: "#",
     },
     {
-      name: "Sign Up",
+      name: "Dashboard",
       href: "#",
     },
     {
-      name: "Log In",
-      href: "#",
-    },
-    {
-      name: "About",
+      name: "My Account",
       href: "#",
     },
   ];

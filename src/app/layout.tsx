@@ -3,7 +3,7 @@ import "~/styles/globals.css";
 import { Poppins } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { type Metadata } from "next";
-import Header from "./_components/header";
+import { TRPCReactProvider } from "~/trpc/client";
 
 export const metadata: Metadata = {
   title: "Tush",
@@ -23,8 +23,7 @@ export default function RootLayout({
     <html lang="en" className={`${font.className} `} suppressHydrationWarning>
       <body className="dark:bg-base-dark bg-base-light">
         <ThemeProvider attribute="class">
-          <Header />
-          <div>{children}</div>
+          <TRPCReactProvider>{children}</TRPCReactProvider>
         </ThemeProvider>
       </body>
     </html>
