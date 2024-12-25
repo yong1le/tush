@@ -49,7 +49,7 @@ export default async function Navbar() {
           <MoonIcon className="hidden md:inline" />
         </li>
         <li>
-          <NavbarItem href={username ? "#" : "/login"}>
+          <NavbarItem href={username ? "#" : "/signin"}>
             <SettingsIcon />
             <p className="hidden md:inline">{username ?? "Login"}</p>
           </NavbarItem>
