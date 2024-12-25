@@ -1,8 +1,7 @@
 import { Button } from "@headlessui/react";
 import { SiGithub } from "@icons-pack/react-simple-icons";
-import { redirect } from "next/navigation";
 import React from "react";
-import { trpc } from "~/trpc/server";
+import { signIn } from "~/server/auth";
 
 const SignInPage = () => {
   return (
@@ -12,8 +11,7 @@ const SignInPage = () => {
       action={async () => {
         "use server";
 
-        await trpc.user.login({ method: "github" });
-        redirect("/dashboard");
+        await signIn("github", { redirectTo: "/dashboard" });
       }}
     >
       <div>
