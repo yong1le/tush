@@ -1,4 +1,3 @@
-import Link from "next/link";
 import ThemeSwitch from "./theme-switch";
 import {
   HomeIcon,
@@ -9,27 +8,7 @@ import {
   SunIcon,
 } from "lucide-react";
 import { trpc } from "~/trpc/server";
-
-function NavbarItem({
-  href,
-  children,
-  className,
-}: {
-  href: string;
-  children: React.ReactNode;
-  className?: string;
-}) {
-  return (
-    <Link
-      href={href}
-      className={`flex flex-row gap-2 items-center px-2 md:px-4 py-2 rounded-md
-        hover:bg-secondary-light dark:hover:bg-secondary-dark transition-colors
-        ${className}`}
-    >
-      {children}
-    </Link>
-  );
-}
+import NavbarItem from "~/app/_components/nav-bar-item";
 
 export default async function Navbar() {
   const username = await trpc.user.getName();
