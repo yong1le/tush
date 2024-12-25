@@ -16,11 +16,9 @@ const ThemeSwitch = () => {
     setMounted(true);
   }, []);
 
-  if (!mounted) return null;
-
   return (
     <Switch
-      checked={resolvedTheme === "dark"}
+      checked={mounted ? resolvedTheme === "dark" : false}
       onChange={changeTheme}
       className="group inline-flex h-6 w-11 items-center rounded-full bg-secondary-light
         transition data-[checked]:bg-secondary-dark"

@@ -4,9 +4,9 @@ export default function MainLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div>
+    <div className="flex flex-row w-screen h-screen">
       <Navbar />
-      <div>{children}</div>
+      <div className="flex-1">{children}</div>
     </div>
   );
 }

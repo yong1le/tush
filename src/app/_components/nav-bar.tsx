@@ -1,67 +1,81 @@
-import {
-  CloseButton,
-  Popover,
-  PopoverBackdrop,
-  PopoverButton,
-  PopoverPanel,
-} from "@headlessui/react";
-import { EllipsisVertical, X } from "lucide-react";
+import Link from "next/link";
 import ThemeSwitch from "./theme-switch";
+import {
+  HomeIcon,
+  ImagesIcon,
+  MoonIcon,
+  SearchIcon,
+  SettingsIcon,
+  SunIcon,
+} from "lucide-react";
+import { trpc } from "~/trpc/server";
 
-export default function Navbar() {
-  const links = [
-    {
-      name: "Create New",
-      href: "#",
-    },
-    {
-      name: "Dashboard",
-      href: "#",
-    },
-    {
-      name: "My Account",
-      href: "#",
-    },
-  ];
+function NavbarItem({
+  href,
+  children,
+  className,
+}: {
+  href: string;
+  children: React.ReactNode;
+  className?: string;
+}) {
+  return (
+    <Link
+      href={href}
+      className={`flex flex-row gap-2 items-center px-2 md:px-4 py-2 rounded-md
+        hover:bg-secondary-light dark:hover:bg-secondary-dark transition-colors
+        ${className}`}
+    >
+      {children}
+    </Link>
+  );
+}
+
+export default async function Navbar() {
+  const username = await trpc.user.getName();
 
   return (
-    <div className="flex flex-row items-end justify-between px-4 py-2">
-      <h2 className="text-2xl font-bold">tush</h2>
+    <div
+      className="px-2 md:px-4 py-2 border-r-secondary-light dark:border-r-secondary-dark flex
+        border-r flex-col justify-between"
+    >
+      <ul>
+        <li>
+          <NavbarItem href="/">
+            <ImagesIcon />
+            <h2 className="text-2xl font-bold hidden md:inline">tush</h2>
+          </NavbarItem>
+        </li>
 
-      <div className="flex flex-row gap-3">
-        <ThemeSwitch />
-        <Popover className="relative">
-          <PopoverButton>
-            <EllipsisVertical className="text-neutral-light dark:text-neutral-dark" />
-          </PopoverButton>
-          <PopoverBackdrop className="fixed inset-0 backdrop-blur bg-black/20" />
-          <PopoverPanel
-            anchor={{
-              to: "bottom",
-              padding: 10,
-            }}
-            transition
-            className={`flex w-72 origin-top flex-row items-start justify-between rounded-xl
-              bg-secondary-light/80 p-5 transition duration-200 ease-out
-              data-[closed]:scale-95 data-[closed]:opacity-0 dark:bg-secondary-dark/90`}
-          >
-            <div className="flex flex-col gap-5">
-              {links.map(({ name, href }, i) => (
-                <a
-                  href={href}
-                  className="font-bold text-neutral-light dark:text-neutral-dark"
-                  key={i}
-                >
-                  {name}
-                </a>
-              ))}
-            </div>
-            <CloseButton>
-              <X className="text-neutral-light dark:text-neutral-dark" />
-            </CloseButton>
-          </PopoverPanel>
-        </Popover>
-      </div>
+        <hr className="border-secondary-light dark:border-secondary-dark my-2 md:my-4" />
+
+        <li className="flex">
+          <NavbarItem href="/dashboard">
+            <HomeIcon />
+            <p className="hidden md:inline">Dashboard</p>
+          </NavbarItem>
+        </li>
+        <li>
+          <NavbarItem href="#">
+            <SearchIcon />
+            <p className="hidden md:inline">Search</p>
+          </NavbarItem>
+        </li>
+      </ul>
+
+      <ul className="">
+        <li className="w-full my-2 flex flex-row gap-4 items-center md:px-4 justify-center">
+          <SunIcon className="hidden md:inline" />
+          <ThemeSwitch />
+          <MoonIcon className="hidden md:inline" />
+        </li>
+        <li>
+          <NavbarItem href={username ? "#" : "/login"}>
+            <SettingsIcon />
+            <p className="hidden md:inline">{username ?? "Login"}</p>
+          </NavbarItem>
+        </li>
+      </ul>
     </div>
   );
 }

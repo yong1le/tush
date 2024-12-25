@@ -2,12 +2,9 @@
 
 import { type ChangeEvent, useEffect, useRef } from "react";
 import { Canvas, FabricImage } from "fabric";
-import { trpc } from "~/trpc/client";
 import { Button, Input } from "@headlessui/react";
 
 const Dashboard = () => {
-  const username = trpc.user.getName.useQuery().data;
-
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<Canvas>();
@@ -112,10 +109,6 @@ const Dashboard = () => {
 
   return (
     <div className="m-10 flex flex-col items-center gap-10">
-      <div>
-        Welcome <span className="font-bold"> {username}</span>
-      </div>
-
       <div
         className="w-5/6 flex justify-center max-w-[1000px]"
         ref={containerRef}
