@@ -9,7 +9,7 @@ export default {
       colors: {
         primary: {
           light: colors.slate["900"],
-          dark: colors.slate["50"],
+          dark: colors.slate["300"],
         },
         secondary: {
           light: colors.slate["200"],
