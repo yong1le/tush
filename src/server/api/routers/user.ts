@@ -7,7 +7,10 @@ import { createTRPCRouter, protectedProcedure, publicProcedure } from "../trpc";
 import { signIn } from "~/server/auth";
 
 export const userRouter = createTRPCRouter({
-  getName: protectedProcedure.query(({ ctx }) => {
+  getName: publicProcedure.query(({ ctx }) => {
+    if (!ctx.session) {
+      return null;
+    }
     return ctx.session.user.name;
   }),
   login: publicProcedure
