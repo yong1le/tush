@@ -8,24 +8,41 @@ import { Button, Input } from "@headlessui/react";
 const Dashboard = () => {
   const username = trpc.user.getName.useQuery().data;
 
+  const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const fabricRef = useRef<Canvas>();
   const frameRef = useRef<FabricImage>();
 
   useEffect(() => {
-    if (canvasRef.current) {
-      const container = canvasRef.current.parentElement;
-      if (container) {
-        canvasRef.current.style.width = "100%";
-        canvasRef.current.width = container.clientWidth;
-        canvasRef.current.height = container.clientWidth * 0.5625; // 16:9 aspect ratio
-        canvasRef.current.style.alignSelf = "center";
+    const handlePageResize = () => {
+      if (!containerRef.current || !fabricRef.current || !frameRef.current) {
+        console.warn("Page has not loaded yet");
+        return;
       }
+
+      console.log("resizing", containerRef.current.clientWidth);
+
+      const canvas = fabricRef.current;
+      const frame = frameRef.current;
+      const container = containerRef.current;
+
+      canvas.setDimensions({
+        width: container.clientWidth,
+        height: container.clientWidth * 0.5625, // 16:9
+      });
+
+      frame.scaleToWidth(canvas.width - 50);
+      canvas.centerObject(frame);
+      canvas.requestRenderAll();
+    };
+
+    if (!canvasRef.current || !containerRef.current) {
+      console.warn("Page has not loaded yet");
+      return;
     }
 
     fabricRef.current = new Canvas(canvasRef.current ?? undefined, {
       preserveObjectStacking: true,
-      width: canvasRef.current?.width,
     });
 
     const canvas = fabricRef.current;
@@ -35,12 +52,15 @@ const Dashboard = () => {
       image.selectable = false;
       image.evented = false;
 
-      image.scaleToWidth(canvas.width - 50);
-      canvas.centerObject(image);
       canvas.add(image);
+
+      handlePageResize();
     });
 
+    window.addEventListener("resize", handlePageResize);
+
     return () => {
+      window.removeEventListener("resize", handlePageResize);
       void canvas.dispose();
     };
   }, []);
@@ -52,17 +72,13 @@ const Dashboard = () => {
       return;
     }
 
-    const canvas = fabricRef.current;
-    if (!canvas) {
-      console.warn("Canvas has not been initialized");
+    if (!fabricRef.current || !frameRef.current) {
+      console.warn("Page has not loaded yet");
       return;
     }
 
+    const canvas = fabricRef.current;
     const frame = frameRef.current;
-    if (!frame) {
-      console.warn("No device frame exists in canvas");
-      return;
-    }
 
     const url = URL.createObjectURL(file);
 
@@ -100,11 +116,14 @@ const Dashboard = () => {
         Welcome <span className="font-bold"> {username}</span>
       </div>
 
-      <div className="w-5/6 flex justify-center">
+      <div
+        className="w-5/6 flex justify-center max-w-[1000px]"
+        ref={containerRef}
+      >
         <canvas ref={canvasRef} />
       </div>
 
-      <div>
+      <div className="gap-2 flex-row flex flex-wrap">
         <Input
           type="file"
           id="imageInput"
@@ -116,7 +135,7 @@ const Dashboard = () => {
             hover:opacity-80 transition-opacity"
         />
         <Button
-          className="bg-primary-light text-secondary-light p-2 rounded dark:bg-primary-dark
+          className="bg-primary-light text-secondary-light py-2 px-4 rounded dark:bg-primary-dark
             dark:text-secondary-dark hover:opacity-80 transition-opacity"
           onClick={downloadCanvasImage}
         >
