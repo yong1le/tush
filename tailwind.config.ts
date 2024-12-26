@@ -6,6 +6,9 @@ export default {
   darkMode: "class",
   theme: {
     extend: {
+      padding: {
+        safe: "env(safe-area-inset-bottom)",
+      },
       colors: {
         primary: {
           light: colors.slate["900"],
