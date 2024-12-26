@@ -3,6 +3,7 @@
 import { type ChangeEvent, useEffect, useRef } from "react";
 import { Canvas, FabricImage } from "fabric";
 import { Button, Input } from "@headlessui/react";
+import { cursorTo } from "readline";
 
 const Dashboard = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -107,31 +108,30 @@ const Dashboard = () => {
     document.body.removeChild(link);
   };
 
+  const buttonStyles = `bg-primary-light text-secondary-light py-2 px-4 rounded-lg dark:bg-primary-dark
+  dark:text-secondary-dark hover:opacity-80 transition-opacity hover:cursor-pointer`;
+
   return (
-    <div className="m-10 flex flex-col items-center gap-10">
+    <div className="flex flex-col items-center gap-10 m-4 md:m-10">
       <div
-        className="w-5/6 flex justify-center max-w-[1000px]"
         ref={containerRef}
+        className="max-w-[1000px] w-[90%] bg-base-light rounded-lg"
       >
         <canvas ref={canvasRef} />
       </div>
 
-      <div className="gap-2 flex-row flex flex-wrap">
+      <div className="gap-2 md:gap-8 md:flex-row flex-col flex items-center">
+        <label htmlFor="imageInput" className={buttonStyles}>
+          Choose Image
+        </label>
         <Input
           type="file"
           id="imageInput"
           onChange={handleUploadFile}
           accept="image/*"
-          className="file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:bg-primary-light
-            file:text-secondary-light dark:file:bg-primary-dark
-            dark:file:text-secondary-dark cursor-pointer file:cursor-pointer
-            hover:opacity-80 transition-opacity"
+          className="hidden"
         />
-        <Button
-          className="bg-primary-light text-secondary-light py-2 px-4 rounded dark:bg-primary-dark
-            dark:text-secondary-dark hover:opacity-80 transition-opacity"
-          onClick={downloadCanvasImage}
-        >
+        <Button className={buttonStyles} onClick={downloadCanvasImage}>
           Download
         </Button>
       </div>

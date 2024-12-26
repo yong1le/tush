@@ -21,7 +21,10 @@ export default function RootLayout({
 }: Readonly<{ children: React.ReactNode }>) {
   return (
     <html lang="en" className={`${font.className} `} suppressHydrationWarning>
-      <body className="dark:bg-base-dark bg-base-light text-primary-light dark:text-primary-dark">
+      <body
+        className="dark:bg-base-dark bg-base-light text-primary-light dark:text-primary-dark
+          box-border"
+      >
         <ThemeProvider attribute="class">
           <TRPCReactProvider>{children}</TRPCReactProvider>
         </ThemeProvider>

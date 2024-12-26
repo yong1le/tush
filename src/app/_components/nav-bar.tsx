@@ -16,7 +16,7 @@ export default async function Navbar() {
   return (
     <div
       className="px-2 md:px-4 py-2 border-r-secondary-light dark:border-r-secondary-dark flex
-        border-r flex-col justify-between"
+        border-r flex-col justify-between h-full"
     >
       <ul>
         <li>
