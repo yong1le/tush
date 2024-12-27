@@ -2,7 +2,14 @@
 
 import { type ChangeEvent, useEffect, useRef } from "react";
 import { Canvas, FabricImage } from "fabric";
-import { Button, Input } from "@headlessui/react";
+import {
+  Button,
+  Input,
+  Menu,
+  MenuButton,
+  MenuItem,
+  MenuItems,
+} from "@headlessui/react";
 
 const MockupPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -87,7 +94,7 @@ const MockupPage = () => {
     canvas.bringObjectToFront(frame);
   };
 
-  const downloadCanvasImage = () => {
+  const downloadCanvasImage = (format: "png" | "jpeg") => {
     const canvas = fabricRef.current;
     if (!canvas) {
       console.warn("Canvas has not been initialized");
@@ -97,10 +104,10 @@ const MockupPage = () => {
     const link = document.createElement("a");
     link.href = canvas.toDataURL({
       multiplier: 1,
-      format: "png",
+      format: format,
       quality: 1,
     });
-    link.download = "canvas.png";
+    link.download = `canvas.${format}`;
 
     document.body.appendChild(link);
     link.click();
@@ -109,6 +116,9 @@ const MockupPage = () => {
 
   const buttonStyles = `bg-primary-light text-secondary-light py-2 px-4 rounded-lg dark:bg-primary-dark
   dark:text-secondary-dark hover:opacity-80 transition-opacity hover:cursor-pointer`;
+
+  const dropdownStyles = `flex group w-full items-center gap-2 rounded-lg py-1.5 px-3
+                  data-[focus]:bg-white/10`;
 
   return (
     <div className="flex flex-col items-center gap-10 m-4 md:m-10">
@@ -130,9 +140,35 @@ const MockupPage = () => {
           accept="image/*"
           className="hidden"
         />
-        <Button className={buttonStyles} onClick={downloadCanvasImage}>
-          Download
-        </Button>
+        <Menu>
+          <MenuButton className={buttonStyles}>Download</MenuButton>
+          <MenuItems
+            transition
+            anchor="bottom end"
+            className="w-28 origin-top-right rounded-lg border border-secondary-light
+              bg-primary-light/80 p-1 text-sm text-base-light transition duration-100 ease-out
+              [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95
+              data-[closed]:opacity-0 dark:bg-primary-dark/80 dark:text-base-dark
+              dark:border-secondary-dark"
+          >
+            <MenuItem>
+              <Button
+                className={dropdownStyles}
+                onClick={() => downloadCanvasImage("png")}
+              >
+                PNG
+              </Button>
+            </MenuItem>
+            <MenuItem>
+              <Button
+                className={dropdownStyles}
+                onClick={() => downloadCanvasImage("jpeg")}
+              >
+                JGP
+              </Button>
+            </MenuItem>
+          </MenuItems>
+        </Menu>
       </div>
     </div>
   );
