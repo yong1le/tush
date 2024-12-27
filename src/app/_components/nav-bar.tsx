@@ -3,9 +3,10 @@ import {
   HomeIcon,
   ImagesIcon,
   MoonIcon,
-  SearchIcon,
   User2Icon,
   SunIcon,
+  LaptopIcon,
+  FolderSyncIcon,
 } from "lucide-react";
 import { trpc } from "~/trpc/server";
 import NavbarItem from "~/app/_components/nav-bar-item";
@@ -29,21 +30,27 @@ export default async function Navbar() {
 
         <hr className="border-secondary-light dark:border-secondary-dark my-2 md:my-4" />
 
-        <li className="flex">
+        <li>
           <NavbarItem href="/dashboard">
             <HomeIcon />
             <p className="hidden md:inline">Dashboard</p>
           </NavbarItem>
         </li>
         <li>
-          <NavbarItem href="#">
-            <SearchIcon />
-            <p className="hidden md:inline">Search</p>
+          <NavbarItem href="/mockup">
+            <LaptopIcon />
+            <p className="hidden md:inline">Mockups</p>
+          </NavbarItem>
+        </li>
+        <li>
+          <NavbarItem href="/convert">
+            <FolderSyncIcon />
+            <p className="hidden md:inline">Convert</p>
           </NavbarItem>
         </li>
       </ul>
 
-      <ul className="">
+      <ul>
         <li className="w-full my-2 flex flex-row gap-4 items-center md:px-4 justify-center">
           <SunIcon className="hidden md:inline" />
           <ThemeSwitch />
