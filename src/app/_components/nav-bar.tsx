@@ -9,9 +9,10 @@ import {
 } from "lucide-react";
 import { trpc } from "~/trpc/server";
 import NavbarItem from "~/app/_components/nav-bar-item";
+import Image from "next/image";
 
 export default async function Navbar() {
-  const username = await trpc.user.getName();
+  const user = await trpc.user.getUser();
 
   return (
     <div
@@ -49,9 +50,19 @@ export default async function Navbar() {
           <MoonIcon className="hidden md:inline" />
         </li>
         <li>
-          <NavbarItem href={username ? "#" : "/signin"}>
-            <SettingsIcon />
-            <p className="hidden md:inline">{username ?? "Login"}</p>
+          <NavbarItem href={user ? "#" : "/signin"}>
+            {user?.image ? (
+              <Image
+                src={user?.image}
+                width={24}
+                height={24}
+                alt="Profile Image"
+                className="rounded-[50%]"
+              />
+            ) : (
+              <SettingsIcon />
+            )}
+            <p className="hidden md:inline">{user?.name ?? "Login"}</p>
           </NavbarItem>
         </li>
       </ul>

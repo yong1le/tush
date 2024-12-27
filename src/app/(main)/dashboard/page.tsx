@@ -3,7 +3,6 @@
 import { type ChangeEvent, useEffect, useRef } from "react";
 import { Canvas, FabricImage } from "fabric";
 import { Button, Input } from "@headlessui/react";
-import { cursorTo } from "readline";
 
 const Dashboard = () => {
   const containerRef = useRef<HTMLDivElement>(null);
