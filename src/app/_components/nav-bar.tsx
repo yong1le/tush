@@ -4,7 +4,7 @@ import {
   ImagesIcon,
   MoonIcon,
   SearchIcon,
-  SettingsIcon,
+  User2Icon,
   SunIcon,
 } from "lucide-react";
 import { trpc } from "~/trpc/server";
@@ -60,7 +60,7 @@ export default async function Navbar() {
                 className="rounded-[50%]"
               />
             ) : (
-              <SettingsIcon />
+              <User2Icon />
             )}
             <p className="hidden md:inline">{user?.name ?? "Login"}</p>
           </NavbarItem>
