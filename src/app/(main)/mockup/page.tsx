@@ -148,7 +148,7 @@ const MockupPage = () => {
             className="w-28 origin-top-right rounded-lg border border-secondary-light
               bg-primary-light/80 p-1 text-sm text-base-light transition duration-100 ease-out
               [--anchor-gap:var(--spacing-1)] focus:outline-none data-[closed]:scale-95
-              data-[closed]:opacity-0 dark:bg-primary-dark/80 dark:text-base-dark
+              data-[closed]:opacity-0 dark:bg-primary-dark/60 dark:text-base-dark
               dark:border-secondary-dark"
           >
             <MenuItem>
