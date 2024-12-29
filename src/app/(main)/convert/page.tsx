@@ -57,7 +57,16 @@ const ConvertPage = () => {
 
   const convertImage = trpc.image.convert.useMutation({
     onSuccess: (data) => {
-      const blob = new Blob([Buffer.from(data.file, "base64")], {
+      console.log("received data, preparing to download...");
+      // Convert base64 to binary
+      const binaryStr = atob(data.file);
+      const len = binaryStr.length;
+      const bytes = new Uint8Array(len);
+      for (let i = 0; i < len; i++) {
+        bytes[i] = binaryStr.charCodeAt(i);
+      }
+
+      const blob = new Blob([bytes], {
         type: "application/zip",
       });
 
@@ -76,6 +85,7 @@ const ConvertPage = () => {
     "publicImageUploader",
     {
       onClientUploadComplete: async (res) => {
+        console.log("preparing to convert...");
         await convertImage.mutateAsync({
           urls: res.map((r) => r.url),
           format: res[0]?.serverData?.format ?? "jpeg",

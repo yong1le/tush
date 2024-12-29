@@ -16,13 +16,7 @@ export const imageRouter = createTRPCRouter({
       try {
         const archive: Archiver = archiver("zip", { zlib: { level: 9 } });
         const chunks: Buffer[] = [];
-
-        // Create a promise to handle the archive completion
-        const archiveComplete = new Promise<void>((resolve, reject) => {
-          archive.on("end", () => resolve());
-          archive.on("error", (err) => reject(err));
-          archive.on("data", (chunk: Buffer) => chunks.push(chunk));
-        });
+        archive.on("data", (chunk: Buffer) => chunks.push(chunk));
 
         await Promise.all(
           input.urls.map(async (url, i) => {
@@ -44,7 +38,6 @@ export const imageRouter = createTRPCRouter({
         );
 
         await archive.finalize();
-        await archiveComplete;
 
         return {
           file: Buffer.concat(chunks).toString("base64"),
