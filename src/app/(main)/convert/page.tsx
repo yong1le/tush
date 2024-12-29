@@ -52,8 +52,18 @@ const ConvertPage = () => {
   const [images, setImages] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  const getPresignedUrls = trpc.s3.generatePresignedUrls.useMutation();
-  const convertImage = trpc.image.convert.useMutation();
+  const getPresignedUrls = trpc.s3.generatePresignedUrls.useMutation({
+    onError(error) {
+      setIsUploading(false);
+      alert(error);
+    },
+  });
+  const convertImage = trpc.image.convert.useMutation({
+    onError(error) {
+      setIsUploading(false);
+      alert(error);
+    },
+  });
 
   const onFileInput = (images: File[]) => {
     setImages((prev) => [...prev, ...images]);
