@@ -55,35 +55,33 @@ const ImagePreview = ({ image }: { image: File }) => {
 const ConvertPage = () => {
   const [images, setImages] = useState<File[]>([]);
 
-  const convertImage = trpc.image.convert.useMutation({
-    onSuccess: (data) => {
-      console.log("Processing success callback");
-      const blob = new Blob([Buffer.from(data.file, "base64")], {
-        type: "application/zip",
-      });
-
-      // Create download link
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = url;
-      a.download = "converted-images.zip";
-      a.click();
-      window.URL.revokeObjectURL(url);
-      setImages([]);
-    },
-  });
+  const convertImage = trpc.image.convert.useMutation();
 
   const { startUpload, isUploading, routeConfig } = useUploadThing(
     "publicImageUploader",
     {
       onClientUploadComplete: async (res) => {
         console.log("preparing to convert...");
-        await convertImage.mutateAsync({
+        const data = await convertImage.mutateAsync({
           urls: res.map((r) => r.url),
           format: res[0]?.serverData?.format ?? "jpeg",
         });
 
         console.log("finished conversion");
+
+        console.log("Processing success callback");
+        const blob = new Blob([Buffer.from(data.file, "base64")], {
+          type: "application/zip",
+        });
+
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "converted-images.zip";
+        a.click();
+        window.URL.revokeObjectURL(url);
+        setImages([]);
       },
       onUploadError: () => {
         alert("error occurred while uploading");
