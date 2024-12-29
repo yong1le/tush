@@ -3,68 +3,56 @@ import { z } from "zod";
 import sharp from "sharp";
 import { TRPCError } from "@trpc/server";
 import JSZip from "jszip";
+import { GetObjectCommand } from "@aws-sdk/client-s3";
+import { s3 } from "~/server/s3";
 
 export const imageRouter = createTRPCRouter({
   convert: publicProcedure
     .input(
       z.object({
-        urls: z.array(z.string()),
+        images: z.array(z.object({ bucket: z.string(), key: z.string() })),
         format: z.enum(["png", "jpeg", "webp"]),
       }),
     )
     .mutation(async ({ input }) => {
+      console.log("starting conversion");
       try {
         const zip = new JSZip();
 
-        // Optimize Sharp settings
-        sharp.cache(false); // Disable caching for memory efficiency
-        sharp.concurrency(1); // Limit concurrent processing
+        // Convert all images first
+        await Promise.all(
+          input.images.map(async (image, i) => {
+            console.log("converting ", image.key);
 
-        // Batch process images in smaller chunks
-        const BATCH_SIZE = 3;
-        for (let i = 0; i < input.urls.length; i += BATCH_SIZE) {
-          const batch = input.urls.slice(i, i + BATCH_SIZE);
-          await Promise.all(
-            batch.map(async (url, index) => {
-              const response = await fetch(url);
-              const arrayBuffer = await response.arrayBuffer();
-              const buffer = Buffer.from(arrayBuffer);
+            const response = await s3.send(
+              new GetObjectCommand({
+                Bucket: image.bucket,
+                Key: image.key,
+              }),
+            );
 
-              const converted = await sharp(buffer)
-                .toFormat(input.format, {
-                  // Format-specific optimizations
-                  ...(input.format === "jpeg" && {
-                    quality: 80,
-                    progressive: true,
-                  }),
-                  ...(input.format === "png" && {
-                    compressionLevel: 6, // Balance between speed and size
-                    palette: true, // Use palette-based encoding for smaller files
-                  }),
-                  ...(input.format === "webp" && {
-                    quality: 80,
-                    effort: 4, // Range 0-6, lower is faster
-                  }),
-                })
-                .resize(1920, 1920, {
-                  // Limit max dimensions
-                  fit: "inside",
-                  withoutEnlargement: true,
-                })
-                .toBuffer();
+            if (!response.Body) throw new Error("No body in response");
 
-              zip.file(`image-${i + index + 1}.${input.format}`, converted);
-            }),
-          );
-        }
+            const buffer = await response.Body.transformToByteArray();
 
-        const zipBuffer = await zip.generateAsync({
-          type: "nodebuffer",
-          compression: "STORE", // Use STORE for faster zipping
-        });
+            zip.file(
+              `image-${i + 1}.${input.format}`,
+              await sharp(buffer).toFormat(input.format).toBuffer(),
+            );
+          }),
+        );
+
+        console.log("generating zip");
+
+        // Generate zip file
+        const zipString = (
+          await zip.generateAsync({ type: "nodebuffer" })
+        ).toString("base64");
+
+        console.log("generated zip");
 
         return {
-          file: zipBuffer.toString("base64"),
+          file: zipString,
         };
       } catch (error) {
         throw new TRPCError({
