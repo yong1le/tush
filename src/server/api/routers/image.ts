@@ -1,8 +1,8 @@
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
 import sharp from "sharp";
-import archiver, { type Archiver } from "archiver";
 import { TRPCError } from "@trpc/server";
+import JSZip from "jszip";
 
 export const imageRouter = createTRPCRouter({
   convert: publicProcedure
@@ -14,33 +14,27 @@ export const imageRouter = createTRPCRouter({
     )
     .mutation(async ({ input }) => {
       try {
-        const archive: Archiver = archiver("zip", { zlib: { level: 9 } });
-        const chunks: Buffer[] = [];
-        archive.on("data", (chunk: Buffer) => chunks.push(chunk));
+        const zip = new JSZip();
 
+        // Convert all images first
         await Promise.all(
           input.urls.map(async (url, i) => {
             const response = await fetch(url);
             const arrayBuffer = await response.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
 
-            const convertedBuffer = await sharp(buffer)
-              .toFormat(input.format)
-              .toBuffer();
-
-            archive.append(convertedBuffer, {
-              name: `image-${i + 1}.${input.format}`,
-            });
-
-            // You might want to save this buffer somewhere or convert to base64
-            return convertedBuffer.toString("base64");
+            zip.file(
+              `image-${i + 1}.${input.format}`,
+              sharp(buffer).toFormat(input.format).toBuffer(),
+            );
           }),
         );
 
-        await archive.finalize();
+        // Generate zip file
+        const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
 
         return {
-          file: Buffer.concat(chunks).toString("base64"),
+          file: zipBuffer.toString("base64"),
         };
       } catch (error) {
         throw new TRPCError({
