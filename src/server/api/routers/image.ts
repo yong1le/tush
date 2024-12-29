@@ -9,7 +9,7 @@ export const imageRouter = createTRPCRouter({
     .input(
       z.object({
         urls: z.array(z.string()),
-        format: z.enum(["png", "jpeg", "svg", "webp"]),
+        format: z.enum(["png", "jpeg", "webp"]),
       }),
     )
     .mutation(async ({ input }) => {

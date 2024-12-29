@@ -1,9 +1,7 @@
 import { type Config } from "tailwindcss";
 import colors from "tailwindcss/colors";
 
-import { withUt } from "uploadthing/tw";
-
-export default withUt({
+export default {
   content: ["./src/**/*.tsx"],
   darkMode: "class",
   theme: {
@@ -48,4 +46,4 @@ export default withUt({
     },
   },
   plugins: [],
-}) satisfies Config;
+} satisfies Config;
