@@ -27,7 +27,7 @@ export const imageRouter = createTRPCRouter({
 
             zip.file(
               `image-${i + 1}.${input.format}`,
-              sharp(buffer).toFormat(input.format).toBuffer(),
+              await sharp(buffer).toFormat(input.format).toBuffer(),
             );
           }),
         );
