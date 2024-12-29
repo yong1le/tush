@@ -57,6 +57,7 @@ const ConvertPage = () => {
 
   const convertImage = trpc.image.convert.useMutation({
     onSuccess: (data) => {
+      console.log("Processing success callback");
       const blob = new Blob([Buffer.from(data.file, "base64")], {
         type: "application/zip",
       });
@@ -81,6 +82,8 @@ const ConvertPage = () => {
           urls: res.map((r) => r.url),
           format: res[0]?.serverData?.format ?? "jpeg",
         });
+
+        console.log("finished conversion");
       },
       onUploadError: () => {
         alert("error occurred while uploading");

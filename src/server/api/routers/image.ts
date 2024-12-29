@@ -35,10 +35,14 @@ export const imageRouter = createTRPCRouter({
         console.log("generating zip");
 
         // Generate zip file
-        const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
+        const zipString = (
+          await zip.generateAsync({ type: "nodebuffer" })
+        ).toString("base64");
+
+        console.log("generated zip");
 
         return {
-          file: zipBuffer.toString("base64"),
+          file: zipString,
         };
       } catch (error) {
         throw new TRPCError({
