@@ -13,12 +13,14 @@ export const imageRouter = createTRPCRouter({
       }),
     )
     .mutation(async ({ input }) => {
+      console.log("starting conversion");
       try {
         const zip = new JSZip();
 
         // Convert all images first
         await Promise.all(
           input.urls.map(async (url, i) => {
+            console.log("converting ", url);
             const response = await fetch(url);
             const arrayBuffer = await response.arrayBuffer();
             const buffer = Buffer.from(arrayBuffer);
@@ -29,6 +31,8 @@ export const imageRouter = createTRPCRouter({
             );
           }),
         );
+
+        console.log("generating zip");
 
         // Generate zip file
         const zipBuffer = await zip.generateAsync({ type: "nodebuffer" });
