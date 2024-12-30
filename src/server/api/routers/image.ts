@@ -1,17 +1,17 @@
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
-import sharp from "sharp";
+import sharp, { format, type FormatEnum } from "sharp";
 import { TRPCError } from "@trpc/server";
 import JSZip from "jszip";
-import { GetObjectCommand } from "@aws-sdk/client-s3";
-import { s3 } from "~/server/s3";
 
 export const imageRouter = createTRPCRouter({
   convert: publicProcedure
     .input(
       z.object({
-        images: z.array(z.object({ bucket: z.string(), key: z.string() })),
-        format: z.enum(["png", "jpeg", "webp"]),
+        urls: z.array(z.string()),
+        format: z.enum(
+          Object.keys(format) as [keyof FormatEnum, ...(keyof FormatEnum)[]],
+        ),
       }),
     )
     .mutation(async ({ input }) => {
@@ -19,26 +19,46 @@ export const imageRouter = createTRPCRouter({
       try {
         const zip = new JSZip();
 
+        const total = input.urls.length;
+        let converted = 0;
+
         // Convert all images first
         await Promise.all(
-          input.images.map(async (image, i) => {
-            console.log("converting ", image.key);
+          input.urls.map(async (url, i) => {
+            console.log("converting ", url);
+            const response = await fetch(url);
+            const arrayBuffer = await response.arrayBuffer();
+            const buffer = Buffer.from(arrayBuffer);
 
-            const response = await s3.send(
-              new GetObjectCommand({
-                Bucket: image.bucket,
-                Key: image.key,
-              }),
-            );
+            let transformer = sharp(buffer);
 
-            if (!response.Body) throw new Error("No body in response");
+            switch (input.format) {
+              case "png":
+                transformer = transformer.png({
+                  compressionLevel: 6, // Balance between speed and compression (range 0-9)
+                  quality: 100, // Maintain original quality
+                });
+                break;
+              case "jpeg":
+                transformer = transformer.jpeg({
+                  quality: 95, // High quality
+                  mozjpeg: true, // Use mozjpeg optimization
+                });
+                break;
+              case "webp":
+                transformer = transformer.webp({
+                  quality: 95, // High quality
+                  lossless: true, // Preserve quality
+                });
+                break;
+              default:
+                transformer = transformer.toFormat(input.format);
+            }
 
-            const buffer = await response.Body.transformToByteArray();
+            zip.file(`image-${i + 1}.${input.format}`, transformer.toBuffer());
 
-            zip.file(
-              `image-${i + 1}.${input.format}`,
-              await sharp(buffer).toFormat(input.format).toBuffer(),
-            );
+            converted++;
+            console.log(`Converted ${converted}/${total} Images `);
           }),
         );
 
@@ -48,8 +68,6 @@ export const imageRouter = createTRPCRouter({
         const zipString = (
           await zip.generateAsync({ type: "nodebuffer" })
         ).toString("base64");
-
-        console.log("generated zip");
 
         return {
           file: zipString,

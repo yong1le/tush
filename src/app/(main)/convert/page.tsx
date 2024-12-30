@@ -10,11 +10,19 @@ import {
 } from "@headlessui/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { upload } from "@vercel/blob/client";
 import { trpc } from "~/trpc/client";
 import { useDropzone } from "react-dropzone";
 import { CloudUploadIcon, Loader2Icon, XIcon } from "lucide-react";
+import type { ImageFormat } from "~/types/sharp";
 
-const formats = ["jpeg", "png", "webp"] as const;
+const SUPPORTED_FORMATS: ImageFormat[] = [
+  "jpeg",
+  "png",
+  "webp",
+  "avif",
+  "tiff",
+];
 
 const ImagePreview = ({ image }: { image: File }) => {
   const [preview, setPreview] = useState<string>("");
@@ -52,13 +60,11 @@ const ConvertPage = () => {
   const [images, setImages] = useState<File[]>([]);
   const [isUploading, setIsUploading] = useState<boolean>(false);
 
-  const getPresignedUrls = trpc.s3.generatePresignedUrls.useMutation({
-    onError(error) {
+  const convert = trpc.image.convert.useMutation({
+    onSuccess() {
       setIsUploading(false);
-      alert(error);
+      setImages([]);
     },
-  });
-  const convertImage = trpc.image.convert.useMutation({
     onError(error) {
       setIsUploading(false);
       alert(error);
@@ -77,7 +83,7 @@ const ConvertPage = () => {
     onDrop: onFileInput,
   });
 
-  const convertImages = async (format: (typeof formats)[number]) => {
+  const convertImages = async (format: ImageFormat) => {
     if (images.length <= 0) {
       console.warn("No images to convert");
       return;
@@ -85,33 +91,22 @@ const ConvertPage = () => {
 
     setIsUploading(true);
 
-    const signedUrls = await getPresignedUrls.mutateAsync({
-      count: images.length,
-    });
-
-    await Promise.all(
-      images.map(async (image, i) => {
-        const url = signedUrls[i];
-        if (!url) return;
-
-        await fetch(url.url, {
-          method: "PUT",
-          headers: {
-            "Content-Length": image.size.toString(),
-          },
-          body: image,
+    const urls = await Promise.all(
+      images.map(async (image) => {
+        const res = await upload(`public/${image.name}`, image, {
+          access: "public",
+          handleUploadUrl: "/api/image/upload",
+          multipart: true,
         });
+
+        return res.downloadUrl;
       }),
     );
 
-    const data = await convertImage.mutateAsync({
-      images: signedUrls.map((u) => {
-        return { bucket: u.bucket, key: u.key };
-      }),
+    const data = await convert.mutateAsync({
+      urls: urls,
       format,
     });
-
-    setIsUploading(false);
 
     console.log("Processing success callback");
     const blob = new Blob([Buffer.from(data.file, "base64")], {
@@ -124,7 +119,6 @@ const ConvertPage = () => {
     a.download = "converted-images.zip";
     a.click();
     window.URL.revokeObjectURL(downloadUrl);
-    setImages([]);
   };
 
   const buttonStyles = `bg-primary-light text-secondary-light py-2 px-4 rounded-lg dark:bg-primary-dark
@@ -173,15 +167,15 @@ const ConvertPage = () => {
                 data-[closed]:opacity-0 dark:bg-primary-dark/60 dark:text-base-dark
                 dark:border-secondary-dark"
             >
-              {formats.map((format) => (
-                <MenuItem key={format}>
+              {SUPPORTED_FORMATS.map((f) => (
+                <MenuItem key={f}>
                   <Button
                     className={dropdownStyles}
                     onClick={async () => {
-                      await convertImages(format);
+                      await convertImages(f);
                     }}
                   >
-                    {format.toUpperCase()}
+                    {f.toUpperCase()}
                   </Button>
                 </MenuItem>
               ))}
