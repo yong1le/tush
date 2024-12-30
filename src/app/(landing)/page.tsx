@@ -10,14 +10,14 @@ export default function Home() {
           Create Perfect Laptop Mockups from Your Images
         </h1>
 
-        <Button
-          className="rounded-xl bg-info-light px-4 py-6 transition-transform data-[hover]:scale-105
-            md:w-[400px] dark:bg-info-dark shadow-xl dark:shadow-secondary-dark/80"
-        >
-          <Link className="text-xl" href="/dashboard">
+        <Link className="text-xl" href="/dashboard">
+          <Button
+            className="rounded-xl bg-info-light px-4 py-6 transition-transform data-[hover]:scale-105
+              md:w-[400px] dark:bg-info-dark shadow-xl dark:shadow-secondary-dark/80"
+          >
             Get Started
-          </Link>
-        </Button>
+          </Button>
+        </Link>
       </div>
       <div className="absolute right-10 bottom-10">
         <ThemeSwitch />
