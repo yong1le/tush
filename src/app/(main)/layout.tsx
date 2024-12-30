@@ -4,7 +4,7 @@ export default function MainLayout({
   children,
 }: Readonly<{ children: React.ReactNode }>) {
   return (
-    <div className="flex flex-row w-screen h-[100dvh] overflow-hidden">
+    <div className="flex flex-col md:flex-row w-screen h-[100dvh] overflow-hidden">
       <div className="shrink-0">
         <Navbar />
       </div>

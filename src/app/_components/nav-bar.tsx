@@ -7,6 +7,7 @@ import {
   SunIcon,
   LaptopIcon,
   FolderSyncIcon,
+  SquareChevronUpIcon,
 } from "lucide-react";
 import { trpc } from "~/trpc/server";
 import NavbarItem from "~/app/_components/nav-bar-item";
@@ -18,7 +19,7 @@ export default async function Navbar() {
   return (
     <div
       className="px-2 md:px-4 py-2 border-r-secondary-light dark:border-r-secondary-dark flex
-        border-r flex-col justify-between h-full"
+        border-r flex-row md:flex-col h-full justify-normal gap-2"
     >
       <ul>
         <li>
@@ -27,9 +28,11 @@ export default async function Navbar() {
             <h2 className="text-2xl font-bold hidden md:inline">tush</h2>
           </NavbarItem>
         </li>
+      </ul>
 
-        <hr className="border-secondary-light dark:border-secondary-dark my-2 md:my-4" />
+      <hr className="hidden md:inline border-secondary-light dark:border-secondary-dark my-2 md:my-4" />
 
+      <ul className="flex flex-row md:flex-col gap-2 overflow-x-auto flex-1">
         <li>
           <NavbarItem href="/dashboard">
             <HomeIcon />
@@ -48,10 +51,16 @@ export default async function Navbar() {
             <p className="hidden md:inline">Convert</p>
           </NavbarItem>
         </li>
+        <li>
+          <NavbarItem href="/upscale">
+            <SquareChevronUpIcon />
+            <p className="hidden md:inline">Upscale</p>
+          </NavbarItem>
+        </li>
       </ul>
 
-      <ul>
-        <li className="w-full my-2 flex flex-row gap-4 items-center md:px-4 justify-center">
+      <ul className="flex flex-row md:flex-col gap-2 shrink-0">
+        <li className="w-full my-2 flex flex-row gap-4 items-center md:px-4">
           <SunIcon className="hidden md:inline" />
           <ThemeSwitch />
           <MoonIcon className="hidden md:inline" />
@@ -59,13 +68,14 @@ export default async function Navbar() {
         <li>
           <NavbarItem href={user ? "#" : "/signin"}>
             {user?.image ? (
-              <Image
-                src={user?.image}
-                width={24}
-                height={24}
-                alt="Profile Image"
-                className="rounded-[50%]"
-              />
+              <div className="relative w-[24px] h-[24px]">
+                <Image
+                  src={user.image}
+                  fill={true}
+                  alt="Profile Image"
+                  className="rounded-[50%]"
+                />
+              </div>
             ) : (
               <User2Icon />
             )}

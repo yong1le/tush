@@ -18,7 +18,7 @@ export default function NavbarItem({
     <Link
       href={href}
       className={`flex flex-row gap-2 items-center px-2 md:px-4 py-2 rounded-md
-        hover:bg-secondary-light dark:hover:bg-secondary-dark transition-colors my-1
+        hover:bg-secondary-light dark:hover:bg-secondary-dark transition-colors
         ${className} ${onCurrentItem && "bg-secondary-light dark:bg-secondary-dark"}`}
     >
       {children}
