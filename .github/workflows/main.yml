@@ -30,7 +30,7 @@ jobs:
           cd dist && npm install sharp --no-save --no-package-lock
           cd ..
           zip -j deploy.zip ./dist/*
-          aws lambda update-function-code --function-name `echo $(jq -r '.FunctionName' lambda.config.json)` --zip-file=fileb://deploy.zip 2> deploy.err || true
+          aws lambda update-function-code --function-name "convert-image-format" --zip-file=fileb://deploy.zip
           echo "::set-output name=error::$(grep -ohw 'deploy.err' -e 'Function not found')"
     outputs:
       aws-err: ${{ steps.deploy-to-aws.outputs.error }}
