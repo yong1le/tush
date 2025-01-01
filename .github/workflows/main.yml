@@ -31,3 +31,4 @@ jobs:
           npm install sharp --no-save --no-package-lock
           zip -jr ../deploy.zip .
           cd ..
+          aws lambda update-function-code --function-name "convert-image-format" --zip-file=fileb://deploy.zip
