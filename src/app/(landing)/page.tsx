@@ -14,7 +14,7 @@ export default function Home() {
           className="rounded-xl bg-info-light px-4 py-6 transition-transform hover:scale-105
             md:w-[400px] dark:bg-info-dark shadow-xl dark:shadow-secondary-dark/80
             text-center"
-          href="/dashboard"
+          href="/mockup"
         >
           <Button className="text-xl">Get Started</Button>
         </Link>

@@ -8,45 +8,13 @@ import {
   MenuItem,
   MenuItems,
 } from "@headlessui/react";
-import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { trpc } from "~/trpc/client";
 import { useDropzone } from "react-dropzone";
 import { CloudUploadIcon, XIcon } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import { ImageFormat } from "~/types";
-
-const ImagePreview = ({ image }: { image: File }) => {
-  const [preview, setPreview] = useState<string>("");
-
-  useEffect(() => {
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setPreview(reader.result as string);
-    };
-    reader.readAsDataURL(image);
-
-    return () => {
-      reader.abort();
-    };
-  }, [image]);
-
-  return (
-    <div
-      className="w-[100px] h-[100px] md:w-[200px] md:h-[200px] relative inline-block mx-2
-        shrink-0"
-    >
-      {preview && (
-        <Image
-          src={preview}
-          alt="Image"
-          className="object-cover rounded-lg"
-          fill={true}
-        />
-      )}
-    </div>
-  );
-};
+import ImagePreview from "~/app/_components/image-preview";
 
 const ConvertPage = () => {
   const [images, setImages] = useState<File[]>([]);
@@ -58,8 +26,15 @@ const ConvertPage = () => {
   const convert = trpc.image.convert.useMutation({});
   const deleteUrls = trpc.image.delete.useMutation();
 
-  const onFileInput = (images: File[]) => {
-    setImages((prev) => [...prev, ...images]);
+  const onFileInput = (newImages: File[]) => {
+    if (images.length >= 5) {
+      alert("You can only convert 5 files at once");
+      return;
+    } else if (images.length + newImages.length > 5) {
+      alert("You can only convert 5 files at once");
+      return;
+    }
+    setImages((prev) => [...prev, ...newImages]);
   };
 
   const removeUploadedImage = (image: File) => {
