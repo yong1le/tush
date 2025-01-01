@@ -26,7 +26,7 @@ jobs:
         run: |
           cd functions
           npm ci || npm i
-          esbuild index.ts --bundle --minify --sourcemap --platform=node --external:sharp --target=es2020 --outfile=dist/index.js
+          npx esbuild index.ts --bundle --minify --sourcemap --platform=node --external:sharp --target=es2020 --outfile=dist/index.js
           cd dist && npm install sharp --no-save --no-package-lock
           zip -j deploy.zip ./dist/*
           aws lambda update-function-code --function-name `echo $(jq -r '.FunctionName' lambda.config.json)` --zip-file=fileb://deploy.zip 2> deploy.err || true
