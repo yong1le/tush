@@ -29,7 +29,7 @@ jobs:
           npx esbuild index.ts --bundle --minify --sourcemap --platform=node --external:sharp --target=es2020 --outfile=dist/index.js
           cd dist
           ls -a
-          npm install sharp --no-save --no-package-lock
+          npm init -y && npm install sharp --no-save --no-package-lock
           ls -a && exit 1
           zip -jr ../deploy.zip .
           cd ..
