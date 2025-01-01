@@ -12,10 +12,9 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import { trpc } from "~/trpc/client";
 import { useDropzone } from "react-dropzone";
-import { CloudUploadIcon, Loader2Icon, XIcon } from "lucide-react";
+import { CloudUploadIcon, XIcon } from "lucide-react";
 import { upload } from "@vercel/blob/client";
 import { ImageFormat } from "~/types";
-import { url } from "node:inspector";
 
 const ImagePreview = ({ image }: { image: File }) => {
   const [preview, setPreview] = useState<string>("");
@@ -51,19 +50,12 @@ const ImagePreview = ({ image }: { image: File }) => {
 
 const ConvertPage = () => {
   const [images, setImages] = useState<File[]>([]);
-  const [isUploading, setIsUploading] = useState<boolean>(false);
+  const [state, setState] = useState<
+    "idle" | "uploading" | "converting" | "downloading"
+  >("idle");
+  const [progress, setProgress] = useState<number>(0);
 
-  const convert = trpc.image.convert.useMutation({
-    onSuccess() {
-      setIsUploading(false);
-      setImages([]);
-    },
-    onError(error) {
-      setIsUploading(false);
-      alert(error);
-    },
-  });
-
+  const convert = trpc.image.convert.useMutation({});
   const deleteUrls = trpc.image.delete.useMutation();
 
   const onFileInput = (images: File[]) => {
@@ -79,51 +71,61 @@ const ConvertPage = () => {
   });
 
   const convertImages = async (format: ImageFormat) => {
-    if (images.length <= 0) {
-      console.warn("No images to convert");
-      return;
+    try {
+      if (images.length <= 0) {
+        console.warn("No images to convert");
+        return;
+      }
+
+      setState("uploading");
+      const urls = await Promise.all(
+        images.map(async (image) => {
+          const res = await upload(`public/${image.name}`, image, {
+            access: "public",
+            handleUploadUrl: "/api/image/upload",
+            multipart: true,
+          });
+
+          setProgress((prev) => prev + 99 / images.length);
+
+          return res.downloadUrl;
+        }),
+      );
+
+      setState("converting");
+      const { zipUrl } = await convert.mutateAsync({
+        urls: urls,
+        format,
+      });
+      setProgress(100);
+
+      setState("downloading");
+      const zipRes = await fetch(zipUrl);
+
+      if (!zipRes.ok) {
+        console.error("Failed to download zip");
+        return;
+      }
+
+      // Delete the blob
+
+      const blob = await zipRes.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = "converted-images.zip";
+      a.click();
+      window.URL.revokeObjectURL(downloadUrl);
+
+      urls.push(zipUrl);
+      await deleteUrls.mutateAsync({ urls: urls });
+    } catch (e) {
+      alert(e);
+    } finally {
+      setProgress(0);
+      setImages([]);
+      setState("idle");
     }
-
-    setIsUploading(true);
-
-    const urls = await Promise.all(
-      images.map(async (image) => {
-        const res = await upload(`public/${image.name}`, image, {
-          access: "public",
-          handleUploadUrl: "/api/image/upload",
-          multipart: true,
-        });
-
-        return res.downloadUrl;
-      }),
-    );
-
-    const { zipUrl } = await convert.mutateAsync({
-      urls: urls,
-      format,
-    });
-
-    console.log("Downloading zip");
-
-    const zipRes = await fetch(zipUrl);
-
-    if (!zipRes.ok) {
-      console.error("Failed to download zip");
-      return;
-    }
-
-    // Delete the blob
-
-    const blob = await zipRes.blob();
-    const downloadUrl = window.URL.createObjectURL(blob);
-    const a = document.createElement("a");
-    a.href = downloadUrl;
-    a.download = "converted-images.zip";
-    a.click();
-    window.URL.revokeObjectURL(downloadUrl);
-
-    urls.push(zipUrl);
-    await deleteUrls.mutateAsync({ urls: urls });
   };
 
   const buttonStyles = `bg-primary-light text-secondary-light py-2 px-4 rounded-lg dark:bg-primary-dark
@@ -139,11 +141,11 @@ const ConvertPage = () => {
           dark:border-neutral-dark"
       >
         <div {...getRootProps()} className="w-full h-full">
-          <Input {...getInputProps()} disabled={isUploading} />
+          <Input {...getInputProps()} disabled={state !== "idle"} />
           <div
             className={`flex flex-col gap-2 w-full items-center justify-center h-full p-10
               hover:bg-secondary-light cursor-pointer transition-colors rounded-lg
-              dark:hover:bg-secondary-dark ${ isUploading &&
+              dark:hover:bg-secondary-dark ${ state !== "idle" &&
               "bg-secondary-light dark:bg-secondary-dark" }`}
           >
             <CloudUploadIcon height={64} width={64} />
@@ -156,11 +158,25 @@ const ConvertPage = () => {
       {images.length > 0 && (
         <div className="flex flex-col md:flex-row gap-2">
           <Menu>
-            <MenuButton className={`${buttonStyles}`} disabled={isUploading}>
-              {!isUploading ? (
+            <MenuButton
+              className={`${buttonStyles}`}
+              disabled={state !== "idle"}
+            >
+              {state === "idle" ? (
                 <>Convert {images.length} images</>
               ) : (
-                <Loader2Icon className="animate-spin" />
+                <div className="w-full flex flex-col gap-1 items-center transition-all">
+                  <div className="h-2 w-32 rounded-full overflow-hidden bg-base-light dark:bg-base-dark">
+                    <div
+                      className="h-full bg-info-light dark:bg-info-dark transition-all duration-300 ease-in-out
+                        rounded-full"
+                      style={{ width: `${progress}%` }}
+                    />
+                  </div>
+                  <span className="text-center text-sm text-secondary-light dark:text-secondary-dark">
+                    {state.toLocaleUpperCase()} - {Math.floor(progress)}%
+                  </span>
+                </div>
               )}
             </MenuButton>
             <MenuItems
