@@ -29,5 +29,5 @@ jobs:
           npx esbuild index.ts --bundle --minify --sourcemap --platform=node --external:sharp --target=es2020 --outfile=dist/index.js
           cd dist && npm install sharp --no-save --no-package-lock
           cd ..
-          zip -j deploy.zip ./dist/
+          zip -jr deploy.zip ./dist/
           aws lambda update-function-code --function-name "convert-image-format" --zip-file=fileb://deploy.zip
