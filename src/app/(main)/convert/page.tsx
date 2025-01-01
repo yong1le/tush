@@ -10,19 +10,12 @@ import {
 } from "@headlessui/react";
 import Image from "next/image";
 import { useEffect, useState } from "react";
-import { upload } from "@vercel/blob/client";
 import { trpc } from "~/trpc/client";
 import { useDropzone } from "react-dropzone";
 import { CloudUploadIcon, Loader2Icon, XIcon } from "lucide-react";
-import type { ImageFormat } from "~/types/sharp";
-
-const SUPPORTED_FORMATS: ImageFormat[] = [
-  "jpeg",
-  "png",
-  "webp",
-  "avif",
-  "tiff",
-];
+import { upload } from "@vercel/blob/client";
+import { ImageFormat } from "~/types";
+import { url } from "node:inspector";
 
 const ImagePreview = ({ image }: { image: File }) => {
   const [preview, setPreview] = useState<string>("");
@@ -71,6 +64,8 @@ const ConvertPage = () => {
     },
   });
 
+  const deleteUrls = trpc.image.delete.useMutation();
+
   const onFileInput = (images: File[]) => {
     setImages((prev) => [...prev, ...images]);
   };
@@ -103,22 +98,32 @@ const ConvertPage = () => {
       }),
     );
 
-    const data = await convert.mutateAsync({
+    const { zipUrl } = await convert.mutateAsync({
       urls: urls,
       format,
     });
 
-    console.log("Processing success callback");
-    const blob = new Blob([Buffer.from(data.file, "base64")], {
-      type: "application/zip",
-    });
+    console.log("Downloading zip");
 
+    const zipRes = await fetch(zipUrl);
+
+    if (!zipRes.ok) {
+      console.error("Failed to download zip");
+      return;
+    }
+
+    // Delete the blob
+
+    const blob = await zipRes.blob();
     const downloadUrl = window.URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = downloadUrl;
     a.download = "converted-images.zip";
     a.click();
     window.URL.revokeObjectURL(downloadUrl);
+
+    urls.push(zipUrl);
+    await deleteUrls.mutateAsync({ urls: urls });
   };
 
   const buttonStyles = `bg-primary-light text-secondary-light py-2 px-4 rounded-lg dark:bg-primary-dark
@@ -167,15 +172,15 @@ const ConvertPage = () => {
                 data-[closed]:opacity-0 dark:bg-primary-dark/60 dark:text-base-dark
                 dark:border-secondary-dark"
             >
-              {SUPPORTED_FORMATS.map((f) => (
-                <MenuItem key={f}>
+              {Object.values(ImageFormat).map((format) => (
+                <MenuItem key={format}>
                   <Button
                     className={dropdownStyles}
                     onClick={async () => {
-                      await convertImages(f);
+                      await convertImages(format);
                     }}
                   >
-                    {f.toUpperCase()}
+                    {format.toUpperCase()}
                   </Button>
                 </MenuItem>
               ))}

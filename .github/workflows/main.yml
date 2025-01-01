@@ -1,0 +1,44 @@
+name: Deploy AWS Lambda
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy_lambda:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check for changed files
+        id: src-files
+        uses: tj-actions/changed-files@v40.1.1
+        with:
+          files: |
+            functions/**
+
+      - name: Configure AWS Credentials
+        if: steps.src-files.outputs.any_changed == 'true'
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+          mask-aws-account-id: "no"
+
+      - name: Deploy to AWS
+        if: steps.src-files.outputs.any_changed == 'true'
+        id: deploy-to-aws
+        run: |
+          cd functions
+          npm ci || npm i
+          esbuild index.ts --bundle --minify --sourcemap --platform=node --external:sharp --target=es2020 --outfile=dist/index.js
+          cd dist && npm install sharp --no-save --no-package-lock
+          zip -j deploy.zip ./dist/*
+          aws lambda update-function-code --function-name `echo $(jq -r '.FunctionName' lambda.config.json)` --zip-file=fileb://deploy.zip 2> deploy.err || true
+          echo "::set-output name=error::$(grep -ohw 'deploy.err' -e 'Function not found')"
+    outputs:
+      aws-err: ${{ steps.deploy-to-aws.outputs.error }}

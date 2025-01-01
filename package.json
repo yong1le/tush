@@ -21,6 +21,7 @@
   },
   "dependencies": {
     "@auth/drizzle-adapter": "^1.7.4",
+    "@aws-sdk/client-lambda": "^3.716.0",
     "@headlessui/react": "^2.2.0",
     "@icons-pack/react-simple-icons": "^10.2.0",
     "@t3-oss/env-nextjs": "^0.10.1",
@@ -46,6 +47,7 @@
     "zod": "^3.24.1"
   },
   "devDependencies": {
+    "@types/aws-lambda": "^8.10.146",
     "@types/eslint": "^8.56.12",
     "@types/fabric": "^5.3.9",
     "@types/node": "^20.17.10",
