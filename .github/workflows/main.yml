@@ -27,7 +27,7 @@ jobs:
           cd functions
           npm ci || npm i
           npx esbuild index.ts --bundle --minify --sourcemap --platform=node --external:sharp --target=es2020 --outfile=dist/index.js
-          cd dist && npm install sharp --no-save --no-package-lock
+          cd dist
+          npm install sharp --no-save --no-package-lock
+          zip -jr ../deploy.zip .
           cd ..
-          zip -jr deploy.zip ./dist/
-          aws lambda update-function-code --function-name "convert-image-format" --zip-file=fileb://deploy.zip
