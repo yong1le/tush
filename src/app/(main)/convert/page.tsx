@@ -27,7 +27,7 @@ const ConvertPage = () => {
   const getPutUrls = trpc.s3.generatePresignedPutUrls.useMutation({});
 
   const onFileInput = (newImages: File[]) => {
-    const cap = 10;
+    const cap = 8;
     if (images.length >= cap) {
       alert(`You can only convert ${cap} files at once`);
       return;

@@ -45,7 +45,7 @@ def convert_image_format(index: int, location: dict, format: str) -> tuple[str, 
         raise Exception(f"Failed to encode image from {key}")
 
     print(f"converted {key}")
-    return (f"image-{index+1}.png", buffer.tobytes())
+    return (f"image-{index+1}.{format}", buffer.tobytes())
 
 
 def handler(event, context):
