@@ -31,14 +31,8 @@ jobs:
         run: |
           cd functions
           mkdir -p package
-          pip install --target ./package -r requirements.txt
           cp main.py ./package/
           cd package
           zip -r ../deploy.zip .
           cd ..
-          aws s3 cp deploy.zip s3://${{ secrets.AWS_S3_BUCKET_NAME }}/lambda/deploy.zip
-          # Update lambda using S3 location
-          aws lambda update-function-code \
-            --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_NAME }} \
-            --s3-bucket ${{ secrets.AWS_S3_BUCKET_NAME }} \
-            --s3-key lambda/deploy.zip
+          aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_NAME }} --zip-file=fileb://deploy.zip
