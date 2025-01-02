@@ -9,7 +9,7 @@ export const s3Router = createTRPCRouter({
     .mutation(async ({ input }) => {
       const presignedUrls = await Promise.all(
         Array.from({ length: input.count }, async () => {
-          const key = crypto.randomUUID();
+          const key = "public/" + crypto.randomUUID();
           return generatePresignedUrl("put", env.AWS_S3_BUCKET_NAME, key).then(
             (url) => ({
               url,
