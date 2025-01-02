@@ -93,6 +93,10 @@ const ConvertPage = () => {
       setProgress(100);
 
       setState("downloading");
+
+      if (!zipUrl) {
+        throw new Error("No url returned");
+      }
       const zipRes = await fetch(zipUrl);
 
       if (!zipRes.ok) {

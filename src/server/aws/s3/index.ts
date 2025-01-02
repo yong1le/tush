@@ -24,7 +24,7 @@ export const generatePresignedUrl = async (
   key: string,
 ) => {
   let command;
-  if (action == "get") {
+  if (action == "put") {
     command = new PutObjectCommand({
       Bucket: bucket,
       Key: key,
