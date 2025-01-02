@@ -60,6 +60,9 @@ async def async_handler(event: dict, context):
     locations: list[dict] = event["locations"]
     format: str = event["format"]
 
+    if not locations:
+        return ""
+
     conversion_start = time.time()
     with ThreadPoolExecutor() as executor:
         results = list(
@@ -86,8 +89,9 @@ async def async_handler(event: dict, context):
     try:
         zip_buffer.seek(0)
         output_name = "outputs/" + str(uuid.uuid4())
+        bucket = locations[0]["bucket"]
         s3_client.put_object(
-            Bucket="tush-dev",
+            Bucket=bucket,
             Key=output_name,
             Body=zip_buffer.getvalue(),
             ContentType="application/zip",
@@ -95,7 +99,7 @@ async def async_handler(event: dict, context):
 
         presigned_url = s3_client.generate_presigned_url(
             "get_object",
-            Params={"Bucket": "tush-dev", "Key": output_name},
+            Params={"Bucket": bucket, "Key": output_name},
             ExpiresIn=3600,
         )
 
