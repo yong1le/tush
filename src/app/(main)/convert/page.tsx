@@ -64,6 +64,9 @@ const ConvertPage = () => {
           const res = await fetch(location.url, {
             method: "PUT",
             body: image,
+            headers: {
+              "Content-Type": "",
+            },
           });
 
           if (!res.ok) {
