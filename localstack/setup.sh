@@ -14,7 +14,7 @@ awslocal s3api put-bucket-cors --bucket "${AWS_S3_BUCKET_NAME}" --cors-configura
 }'
 
 awslocal lambda create-function \
-  --function-name "${AWS_LAMBDA_FUNCTION_NAME}" \
+  --function-name "${AWS_LAMBDA_FN_NAME}" \
   --runtime "python3.12" \
   --role arn:aws:iam::000000000000:role/lambda-role \
   --code S3Bucket=hot-reload,S3Key='$FUNCTIONS_DIR' \

@@ -19,7 +19,7 @@ export const imageRouter = createTRPCRouter({
     .mutation(async ({ input }) => {
       const res = await lambda.send(
         new InvokeCommand({
-          FunctionName: env.AWS_LAMBDA_FUNCTION_NAME,
+          FunctionName: env.AWS_LAMBDA_FN_NAME,
           Payload: JSON.stringify({
             locations: input.locations,
             format: input.format,

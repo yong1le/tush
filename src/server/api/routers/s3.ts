@@ -1,6 +1,6 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { generatePresignedUrl, s3 } from "~/server/aws/s3";
+import { generatePresignedUrl } from "~/server/aws/s3";
 import { env } from "~/env";
 
 export const s3Router = createTRPCRouter({
