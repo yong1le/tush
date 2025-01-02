@@ -1,5 +1,5 @@
 import { Button } from "@headlessui/react";
-import { SiGithub } from "@icons-pack/react-simple-icons";
+import { GithubIcon } from "lucide-react";
 import React from "react";
 import { signIn } from "~/server/auth";
 
@@ -26,7 +26,7 @@ const SignInPage = () => {
         type="submit"
         className="flex flex-row gap-2 w-3/4 justify-center py-3 bg-black text-white rounded-lg"
       >
-        <SiGithub />
+        <GithubIcon />
         Github
       </Button>
     </form>

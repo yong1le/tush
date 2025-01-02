@@ -20,11 +20,13 @@ services:
       AWS_ACEESS_KEY_ID: ${AWS_ACEESS_KEY_ID:-test}
       AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY:-test}
       SERVICES: "lambda"
-      DEBUG: 1
-      FUNCTIONS_DIR: ${PWD}/functions/dist
-      BLOB_READ_WRITE_TOKEN: ${BLOB_READ_WRITE_TOKEN:-test}
+      FUNCTIONS_DIR: ${PWD}/functions
+      AWS_S3_BUCKET_NAME: ${AWS_S3_BUCKET_NAME:-tush-dev}
+      AWS_LAMBDA_FUNCTION_NAME: ${AWS_LAMBDA_FUNCTION_NAME:-tush-processor-dev}
+      LAMBDA_REMOTE_DOCKER: false
     ports:
       - "4566:4566"
+      - 4510-4559:4510-4559
     volumes:
       - /var/run/docker.sock:/var/run/docker.sock
       - ./localstack/setup.sh:/etc/localstack/init/ready.d/script.sh
@@ -35,7 +37,6 @@ services:
       context: ./functions
     volumes:
       - ./functions:/functions
-      - /functions/node_modules
 
 networks:
   postgres:

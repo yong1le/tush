@@ -1,8 +1,10 @@
-FROM node:22-slim
+FROM python:3.12-slim
 
 WORKDIR /functions
-COPY . .
 
-RUN npm install
+COPY requirements.txt requirements.txt
 
-CMD [ "npm", "run", "build" ]
+COPY main.py main.py
+COPY watch-deps.sh watch-deps.sh
+
+CMD ["./watch-deps.sh"]

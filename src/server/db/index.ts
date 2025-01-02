@@ -1,5 +1,5 @@
 import { drizzle } from "drizzle-orm/postgres-js";
-import postgres from "postgres";
+import postgres from ".pnpm/postgres@3.4.5/node_modules/postgres";
 
 import { env } from "~/env";
 

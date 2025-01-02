@@ -12,7 +12,6 @@ import { useState } from "react";
 import { trpc } from "~/trpc/client";
 import { useDropzone } from "react-dropzone";
 import { CloudUploadIcon, XIcon } from "lucide-react";
-import { upload } from "@vercel/blob/client";
 import { ImageFormat } from "~/types";
 import ImagePreview from "~/app/_components/image-preview";
 
@@ -23,15 +22,17 @@ const ConvertPage = () => {
   >("idle");
   const [progress, setProgress] = useState<number>(0);
 
+  // TRPC mutations
   const convert = trpc.image.convert.useMutation({});
-  const deleteUrls = trpc.image.delete.useMutation();
+  const getPutUrls = trpc.s3.generatePresignedPutUrls.useMutation({});
 
   const onFileInput = (newImages: File[]) => {
-    if (images.length >= 5) {
-      alert("You can only convert 5 files at once");
+    const cap = 10;
+    if (images.length >= cap) {
+      alert(`You can only convert ${cap} files at once`);
       return;
-    } else if (images.length + newImages.length > 5) {
-      alert("You can only convert 5 files at once");
+    } else if (images.length + newImages.length > cap) {
+      alert(`You can only convert ${cap} files at once`);
       return;
     }
     setImages((prev) => [...prev, ...newImages]);
@@ -53,23 +54,37 @@ const ConvertPage = () => {
       }
 
       setState("uploading");
-      const urls = await Promise.all(
-        images.map(async (image) => {
-          const res = await upload(`public/${image.name}`, image, {
-            access: "public",
-            handleUploadUrl: "/api/image/upload",
-            multipart: true,
+
+      const locations = await getPutUrls.mutateAsync({ count: images.length });
+
+      const uploaded = await Promise.all(
+        images.map(async (image, i) => {
+          const location = locations[i]!;
+
+          const res = await fetch(location.url, {
+            method: "PUT",
+            body: image,
           });
+
+          if (!res.ok) {
+            console.error(
+              `Error in uploading ${image.name} to ${location.url}`,
+            );
+            return;
+          }
 
           setProgress((prev) => prev + 99 / images.length);
 
-          return res.downloadUrl;
+          return {
+            bucket: location.bucket,
+            key: location.key,
+          };
         }),
       );
 
       setState("converting");
       const { zipUrl } = await convert.mutateAsync({
-        urls: urls,
+        locations: uploaded.filter((i) => i !== undefined),
         format,
       });
       setProgress(100);
@@ -83,7 +98,6 @@ const ConvertPage = () => {
       }
 
       // Delete the blob
-
       const blob = await zipRes.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -91,9 +105,6 @@ const ConvertPage = () => {
       a.download = "converted-images.zip";
       a.click();
       window.URL.revokeObjectURL(downloadUrl);
-
-      urls.push(zipUrl);
-      await deleteUrls.mutateAsync({ urls: urls });
     } catch (e) {
       alert(e);
     } finally {

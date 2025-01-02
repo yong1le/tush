@@ -1,4 +1,4 @@
-import { type Config } from "drizzle-kit";
+import { type Config } from ".pnpm/drizzle-kit@0.24.2/node_modules/drizzle-kit";
 
 import { env } from "~/env";
 

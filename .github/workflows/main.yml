@@ -13,6 +13,11 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: "3.12" # Specify your Python version
+
       - name: Configure AWS Credentials
         uses: aws-actions/configure-aws-credentials@v4
         with:
@@ -25,10 +30,10 @@ jobs:
         id: deploy-to-aws
         run: |
           cd functions
-          npm ci || npm i
-          npx esbuild index.ts --bundle --minify --sourcemap --platform=node --external:sharp --target=es2020 --outfile=dist/index.js
-          cd dist
-          npm init -y && npm install sharp --no-save --no-package-lock
+          mkdir -p package
+          pip install --target ./package -r requirements.txt
+          cp main.py ./package/
+          cd package
           zip -r ../deploy.zip .
           cd ..
-          aws lambda update-function-code --function-name "convert-image-format" --zip-file=fileb://deploy.zip
+          aws lambda update-function-code --function-name ${{ secrets.AWS_LAMBDA_FUNCTION_NAME }} --zip-file=fileb://deploy.zip

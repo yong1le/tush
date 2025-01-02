@@ -1,4 +1,4 @@
-import { DrizzleAdapter } from "@auth/drizzle-adapter";
+import { DrizzleAdapter } from ".pnpm/@auth+drizzle-adapter@1.7.4/node_modules/@auth/drizzle-adapter";
 import GitHub from "next-auth/providers/github";
 import { type DefaultSession, type NextAuthConfig } from "next-auth";
 

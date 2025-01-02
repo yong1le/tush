@@ -1,8 +1,8 @@
 import { LambdaClient } from "@aws-sdk/client-lambda";
 
-import { env } from "~/env";
+import { env } from "src/env";
 
-export const lambdaClient = new LambdaClient({
+export const lambda = new LambdaClient({
   endpoint:
     env.NODE_ENV === "development" ? "http://localhost:4566" : undefined,
   region: env.AWS_REGION,

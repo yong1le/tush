@@ -1,26 +1,27 @@
 import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { InvokeCommand } from "@aws-sdk/client-lambda";
-import { lambdaClient } from "~/server/functions";
+import { lambda } from "~/server/aws/lambda";
 import { ImageFormat } from "~/types";
 
 import type { APIGatewayProxyResult } from "aws-lambda";
 import { del } from "@vercel/blob";
+import { env } from "~/env";
 
 export const imageRouter = createTRPCRouter({
   convert: publicProcedure
     .input(
       z.object({
-        urls: z.array(z.string()),
+        locations: z.array(z.object({ bucket: z.string(), key: z.string() })),
         format: z.nativeEnum(ImageFormat),
       }),
     )
     .mutation(async ({ input }) => {
-      const res = await lambdaClient.send(
+      const res = await lambda.send(
         new InvokeCommand({
-          FunctionName: "convert-image-format",
+          FunctionName: env.AWS_LAMBDA_FUNCTION_NAME,
           Payload: JSON.stringify({
-            urls: input.urls,
+            locations: input.locations,
             format: input.format,
           }),
         }),
