@@ -5,8 +5,8 @@ import { lambda } from "~/server/aws/lambda";
 import { ImageFormat } from "~/types";
 
 import type { APIGatewayProxyResult } from "aws-lambda";
-import { del } from "@vercel/blob";
 import { env } from "~/env";
+import { jobs } from "~/server/db/schemas/jobs";
 
 export const imageRouter = createTRPCRouter({
   convert: publicProcedure
@@ -16,41 +16,56 @@ export const imageRouter = createTRPCRouter({
         format: z.nativeEnum(ImageFormat),
       }),
     )
-    .mutation(async ({ input }) => {
-      const res = await lambda.send(
-        new InvokeCommand({
-          FunctionName: env.AWS_LAMBDA_FN_NAME,
-          Payload: JSON.stringify({
-            locations: input.locations,
-            format: input.format,
+    .mutation(async ({ ctx, input }) => {
+      let res;
+      try {
+        res = await lambda.send(
+          new InvokeCommand({
+            FunctionName: env.AWS_LAMBDA_FN_NAME,
+            Payload: JSON.stringify({
+              locations: input.locations,
+              format: input.format,
+            }),
           }),
-        }),
-      );
+        );
+      } catch (e: unknown) {
+        if (e instanceof Error) throw e;
+        throw new Error(
+          "Error invoking lambda function, please contact the administrator for details",
+        );
+      }
 
       const payload = new TextDecoder().decode(res.Payload);
       const result = JSON.parse(payload) as APIGatewayProxyResult;
+      const body = JSON.parse(result.body) as {
+        url: string;
+        bucket: string;
+        key: string;
+        message: string;
+      };
 
       if (result.statusCode != 200) {
-        throw new Error(`Lambda function error with ${result.statusCode}`);
+        throw new Error(
+          `Lambda function failed with code: ${result.statusCode}`,
+        );
       }
 
-      const body = JSON.parse(result.body) as { zipUrl: string };
+      if (ctx.session?.user.id) {
+        console.log("Saving job to database");
+        await ctx.db
+          .insert(jobs)
+          .values({
+            user_id: ctx.session.user.id,
+            output: {
+              bucket: body.bucket,
+              key: body.key,
+            },
+          })
+          .execute();
+      }
 
       return {
-        zipUrl: body.zipUrl,
+        url: body.url,
       };
-    }),
-  delete: publicProcedure
-    .input(
-      z.object({
-        urls: z.array(z.string()),
-      }),
-    )
-    .mutation(async ({ input }) => {
-      await Promise.all(
-        input.urls.map(async (url) => {
-          await del(url);
-        }),
-      );
     }),
 });

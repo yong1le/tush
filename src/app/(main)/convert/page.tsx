@@ -86,7 +86,7 @@ const ConvertPage = () => {
       );
 
       setState("converting");
-      const { zipUrl } = await convert.mutateAsync({
+      const { url } = await convert.mutateAsync({
         locations: uploaded.filter((i) => i !== undefined),
         format,
       });
@@ -94,18 +94,18 @@ const ConvertPage = () => {
 
       setState("downloading");
 
-      if (!zipUrl) {
+      if (!url) {
         throw new Error("No url returned");
       }
-      const zipRes = await fetch(zipUrl);
+      const res = await fetch(url);
 
-      if (!zipRes.ok) {
+      if (!res.ok) {
         console.error("Failed to download zip");
         return;
       }
 
       // Delete the blob
-      const blob = await zipRes.blob();
+      const blob = await res.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = downloadUrl;
