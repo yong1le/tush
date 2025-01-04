@@ -53,26 +53,21 @@ async def async_handler(event: dict, context):
     try:
         locations: list[dict] = event["locations"]
         format: str = event["format"]
+        bucket: str = event["output"]["bucket"]
+        key: str = event["output"]["key"]
 
         if not locations:
             raise ValueError("Cannot have empty locations list")
 
         if format not in format_params:
             raise ValueError(f"Unsupported format: {format}")
+
     except ValueError as e:
-        return {
-            "statusCode": 400,
-            "body": json.dumps({"error": str(e)}),
-        }
+        raise e
     except Exception as _:
-        return {
-            "statusCode": 400,
-            "body": json.dumps(
-                {
-                    "error": "Invalid payload. Must be in the form {\n  locations: string[],\n  format: string\n}"
-                }
-            ),
-        }
+        raise Exception(
+            "Invalid payload. Must be in the form {\n  locations: string[],\n  format: string\n}"
+        )
 
     try:
         conversion_start = time.time()
@@ -93,37 +88,21 @@ async def async_handler(event: dict, context):
                 for filename, data in results:
                     zip_file.writestr(filename, data)
             except Exception as e:
-                print("Error writing to zip", e)
+                raise Exception("Error writing to zip:", str(e))
         zip_time = time.time() - zip_start
 
         print(f"Image conversion took: {conversion_time:.2f} seconds")
         print(f"Zip generation and upload took: {zip_time:.2f} seconds")
 
         zip_buffer.seek(0)
-        output_name = "outputs/" + str(uuid.uuid4())
-        bucket = locations[0]["bucket"]
+
+        print(f"Uploading {bucket} at {key}")
         s3_client.put_object(
             Bucket=bucket,
-            Key=output_name,
+            Key=key,
             Body=zip_buffer.getvalue(),
             ContentType="application/zip",
         )
 
-        presigned_url = s3_client.generate_presigned_url(
-            "get_object",
-            Params={"Bucket": bucket, "Key": output_name},
-            ExpiresIn=3600,
-        )
-
-        return {
-            "statusCode": 200,
-            "body": json.dumps(
-                {
-                    "url": presigned_url,
-                    "bucket": bucket,
-                    "key": output_name,
-                }
-            ),
-        }
     except Exception as e:
-        return {"statusCode": 500, "body": json.dumps({"error": str(e)})}
+        raise e

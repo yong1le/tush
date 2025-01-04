@@ -24,10 +24,12 @@ const ConvertPage = () => {
 
   // TRPC mutations
   const convert = trpc.image.convert.useMutation({});
-  const getPutUrls = trpc.s3.generatePresignedPutUrls.useMutation({});
+  const getPresignedPutUrls = trpc.s3.generatePresignedPutUrls.useMutation({});
+  const checkObjectExists = trpc.s3.checkObjectExists.useMutation({});
+  const getPresignedGetUrl = trpc.s3.generatePresignedGetUrl.useMutation({});
 
   const onFileInput = (newImages: File[]) => {
-    const cap = 8;
+    const cap = 10;
     if (images.length >= cap) {
       alert(`You can only convert ${cap} files at once`);
       return;
@@ -46,16 +48,48 @@ const ConvertPage = () => {
     onDrop: onFileInput,
   });
 
+  const waitForObject = (bucket: string, key: string) => {
+    return new Promise((resolve, reject) => {
+      const pollInterval = setInterval(() => {
+        checkObjectExists
+          .mutateAsync({ bucket, key })
+          .then((result) => {
+            if (result?.exists) {
+              clearInterval(pollInterval);
+              setState("downloading");
+              resolve(true);
+            }
+          })
+          .catch((error) => {
+            clearInterval(pollInterval);
+            if (error instanceof Error) {
+              reject(error);
+            }
+            reject(new Error("Failed to wait for object to exist"));
+          });
+      }, 4000);
+
+      setTimeout(
+        () => {
+          clearInterval(pollInterval);
+          reject(new Error("Timeout waiting for object to exist"));
+        },
+        2 * 60 * 1000, // 2 minutes
+      );
+    });
+  };
+
   const convertImages = async (format: ImageFormat) => {
     try {
       if (images.length <= 0) {
-        console.warn("No images to convert");
-        return;
+        throw new Error("No images to convert");
       }
 
       setState("uploading");
 
-      const locations = await getPutUrls.mutateAsync({ count: images.length });
+      const locations = await getPresignedPutUrls.mutateAsync({
+        count: images.length,
+      });
 
       const uploaded = await Promise.all(
         images.map(async (image, i) => {
@@ -64,16 +98,12 @@ const ConvertPage = () => {
           const res = await fetch(location.url, {
             method: "PUT",
             body: image,
-            headers: {
-              "Content-Type": "",
-            },
           });
 
           if (!res.ok) {
-            console.error(
+            throw new Error(
               `Error in uploading ${image.name} to ${location.url}`,
             );
-            return;
           }
 
           setProgress((prev) => prev + 99 / images.length);
@@ -86,25 +116,22 @@ const ConvertPage = () => {
       );
 
       setState("converting");
-      const { url } = await convert.mutateAsync({
+      const { bucket, key } = await convert.mutateAsync({
         locations: uploaded.filter((i) => i !== undefined),
         format,
       });
-      setProgress(100);
 
-      setState("downloading");
-
-      if (!url) {
-        throw new Error("No url returned");
-      }
+      await waitForObject(bucket, key);
+      const { url } = await getPresignedGetUrl.mutateAsync({
+        bucket: bucket,
+        key: key,
+      });
       const res = await fetch(url);
 
       if (!res.ok) {
-        console.error("Failed to download zip");
-        return;
+        throw new Error("Failed to download zip");
       }
 
-      // Delete the blob
       const blob = await res.blob();
       const downloadUrl = window.URL.createObjectURL(blob);
       const a = document.createElement("a");

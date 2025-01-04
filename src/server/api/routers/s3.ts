@@ -1,7 +1,8 @@
 import { z } from "zod";
 import { createTRPCRouter, publicProcedure } from "../trpc";
-import { generatePresignedUrl } from "~/server/aws/s3";
+import { generatePresignedUrl, s3 } from "~/server/aws/s3";
 import { env } from "~/env";
+import { HeadObjectCommand } from "@aws-sdk/client-s3";
 
 export const s3Router = createTRPCRouter({
   generatePresignedPutUrls: publicProcedure
@@ -21,5 +22,29 @@ export const s3Router = createTRPCRouter({
       );
 
       return presignedUrls;
+    }),
+  generatePresignedGetUrl: publicProcedure
+    .input(z.object({ bucket: z.string(), key: z.string() }))
+    .mutation(async ({ input }) => {
+      const url = await generatePresignedUrl("get", input.bucket, input.key);
+
+      return {
+        url: url,
+      };
+    }),
+  checkObjectExists: publicProcedure
+    .input(z.object({ bucket: z.string(), key: z.string() }))
+    .mutation(async ({ input }) => {
+      try {
+        await s3.send(
+          new HeadObjectCommand({
+            Bucket: input.bucket,
+            Key: input.key,
+          }),
+        );
+        return { exists: true };
+      } catch (error) {
+        return { exists: false };
+      }
     }),
 });
