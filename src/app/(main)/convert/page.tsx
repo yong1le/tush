@@ -12,6 +12,7 @@ import { useState } from "react";
 import { trpc } from "~/trpc/client";
 import { useDropzone } from "react-dropzone";
 import { CloudUploadIcon, XIcon } from "lucide-react";
+import toast from "react-hot-toast";
 import { ImageFormat } from "~/types";
 import ImagePreview from "~/app/_components/image-preview";
 
@@ -56,7 +57,6 @@ const ConvertPage = () => {
           .then((result) => {
             if (result?.exists) {
               clearInterval(pollInterval);
-              setState("downloading");
               resolve(true);
             }
           })
@@ -81,7 +81,7 @@ const ConvertPage = () => {
 
   const convertImages = async (format: ImageFormat) => {
     try {
-      if (images.length <= 0) {
+      if (images.length > 0) {
         throw new Error("No images to convert");
       }
 
@@ -122,6 +122,9 @@ const ConvertPage = () => {
       });
 
       await waitForObject(bucket, key);
+
+      setState("downloading");
+      setProgress(100);
       const { url } = await getPresignedGetUrl.mutateAsync({
         bucket: bucket,
         key: key,
@@ -140,7 +143,11 @@ const ConvertPage = () => {
       a.click();
       window.URL.revokeObjectURL(downloadUrl);
     } catch (e) {
-      alert(e);
+      if (e instanceof Error) {
+        toast.error(e.message);
+      } else {
+        toast.error(String(e));
+      }
     } finally {
       setProgress(0);
       setImages([]);

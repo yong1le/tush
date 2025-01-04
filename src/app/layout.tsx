@@ -3,6 +3,7 @@ import "~/styles/globals.css";
 import { Poppins } from "next/font/google";
 import { ThemeProvider } from "next-themes";
 import { type Metadata } from "next";
+import { Toaster } from "react-hot-toast";
 import { TRPCReactProvider } from "~/trpc/client";
 
 export const metadata: Metadata = {
@@ -27,6 +28,13 @@ export default function RootLayout({
       >
         <ThemeProvider attribute="class">
           <TRPCReactProvider>{children}</TRPCReactProvider>
+          <Toaster
+            position="top-right"
+            toastOptions={{
+              className:
+                "dark:bg-info-dark dark:text-base-dark dark:shadow-black mx-2",
+            }}
+          />
         </ThemeProvider>
       </body>
     </html>
