@@ -81,7 +81,7 @@ const ConvertPage = () => {
 
   const convertImages = async (format: ImageFormat) => {
     try {
-      if (images.length > 0) {
+      if (images.length <= 0) {
         throw new Error("No images to convert");
       }
 
