@@ -33,12 +33,14 @@ export default async function Navbar() {
       <hr className="hidden md:inline border-secondary-light dark:border-secondary-dark my-2 md:my-4" />
 
       <ul className="flex flex-row md:flex-col gap-2 overflow-x-auto flex-1">
-        {/* <li> */}
-        {/*   <NavbarItem href="/dashboard"> */}
-        {/*     <HomeIcon /> */}
-        {/*     <p className="hidden md:inline">Dashboard</p> */}
-        {/*   </NavbarItem> */}
-        {/* </li> */}
+        {user && (
+          <li>
+            <NavbarItem href="/dashboard">
+              <HomeIcon />
+              <p className="hidden md:inline">Dashboard</p>
+            </NavbarItem>
+          </li>
+        )}
         <li>
           <NavbarItem href="/mockup">
             <LaptopIcon />

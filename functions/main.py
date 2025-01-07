@@ -17,15 +17,22 @@ format_params = {
     "webp": (".webp", [cv2.IMWRITE_WEBP_QUALITY, 85]),
 }
 
+# job_type_map = {"convert": convert_image_format}
 
-def convert_image_format(index: int, location: dict, format: str) -> tuple[str, bytes]:
+
+def convert_image_format(
+    index: int, location: dict, options: dict
+) -> tuple[str, bytes]:
     """
     Convert a single image file to the specified format and return its
     name and converted bytes.
     """
-
+    format: str = options["format"]
     bucket = location["bucket"]
     key = location["key"]
+
+    if format not in format_params:
+        raise ValueError(f"Unsupported format: {options}")
 
     print(f"converting {key}")
 
@@ -51,30 +58,24 @@ def handler(event, context):
 
 async def async_handler(event: dict, context):
     try:
-        locations: list[dict] = event["locations"]
-        format: str = event["format"]
+        locations: list[dict] = event["input"]["images"]
+        job_type: str = event["input"]["type"]
+        options: dict = event["input"]["options"]
         bucket: str = event["output"]["bucket"]
         key: str = event["output"]["key"]
 
         if not locations:
             raise ValueError("Cannot have empty locations list")
 
-        if format not in format_params:
-            raise ValueError(f"Unsupported format: {format}")
-
-    except ValueError as e:
+    except Exception as e:
         raise e
-    except Exception as _:
-        raise Exception(
-            "Invalid payload. Must be in the form {\n  locations: string[],\n  format: string\n}"
-        )
 
     try:
         conversion_start = time.time()
         with ThreadPoolExecutor() as executor:
             results = list(
                 executor.map(
-                    lambda x: convert_image_format(x[0], x[1], format),
+                    lambda x: convert_image_format(x[0], x[1], options),
                     enumerate(locations),
                 )
             )

@@ -1,17 +1,19 @@
-import { pgTable, text, jsonb } from "drizzle-orm/pg-core";
+import { pgTable, text, jsonb, pgEnum } from "drizzle-orm/pg-core";
 import { users } from "./auth";
+import { type JobOptions, type FileLocation, JobType } from "~/types";
 
-type JobOutputLocation = {
-  bucket: string;
-  key: string;
-};
-
+export const jobTypeEnum = pgEnum(
+  "job_type",
+  Object.values(JobType) as [JobType, ...JobType[]],
+);
 export const jobs = pgTable("jobs", {
   id: text("id")
     .primaryKey()
     .$defaultFn(() => crypto.randomUUID()),
-  user_id: text("user_id")
+  userId: text("user_id")
     .notNull()
     .references(() => users.id, { onDelete: "cascade" }),
-  output: jsonb("output").notNull().$type<JobOutputLocation>(),
+  jobType: jobTypeEnum("job_type").notNull().default(JobType.CONVERT),
+  options: jsonb("options").notNull().$type<JobOptions>(),
+  output: jsonb("output").notNull().$type<FileLocation>(),
 });

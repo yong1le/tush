@@ -9,25 +9,17 @@ import {
   MenuItems,
 } from "@headlessui/react";
 import { useState } from "react";
-import { trpc } from "~/trpc/client";
 import { useDropzone } from "react-dropzone";
 import { CloudUploadIcon, XIcon } from "lucide-react";
 import toast from "react-hot-toast";
-import { ImageFormat } from "~/types";
+import { ImageFormat, JobType } from "~/types";
 import ImagePreview from "~/app/_components/image-preview";
+import { useImageProcessing } from "~/app/_hooks/use-image-processing";
 
 const ConvertPage = () => {
   const [images, setImages] = useState<File[]>([]);
-  const [state, setState] = useState<
-    "idle" | "uploading" | "converting" | "downloading"
-  >("idle");
-  const [progress, setProgress] = useState<number>(0);
 
-  // TRPC mutations
-  const convert = trpc.image.convert.useMutation({});
-  const getPresignedPutUrls = trpc.s3.generatePresignedPutUrls.useMutation({});
-  const checkObjectExists = trpc.s3.checkObjectExists.useMutation({});
-  const getPresignedGetUrl = trpc.s3.generatePresignedGetUrl.useMutation({});
+  const { state, progress, startProcessing, isLoading } = useImageProcessing();
 
   const onFileInput = (newImages: File[]) => {
     const cap = 10;
@@ -49,85 +41,10 @@ const ConvertPage = () => {
     onDrop: onFileInput,
   });
 
-  const waitForObject = (bucket: string, key: string) => {
-    return new Promise((resolve, reject) => {
-      const pollInterval = setInterval(() => {
-        checkObjectExists
-          .mutateAsync({ bucket, key })
-          .then((result) => {
-            if (result?.exists) {
-              clearInterval(pollInterval);
-              resolve(true);
-            }
-          })
-          .catch((error) => {
-            clearInterval(pollInterval);
-            if (error instanceof Error) {
-              reject(error);
-            }
-            reject(new Error("Failed to wait for object to exist"));
-          });
-      }, 4000);
-
-      setTimeout(
-        () => {
-          clearInterval(pollInterval);
-          reject(new Error("Timeout waiting for object to exist"));
-        },
-        2 * 60 * 1000, // 2 minutes
-      );
-    });
-  };
-
-  const convertImages = async (format: ImageFormat) => {
+  const processImages = async (format: ImageFormat) => {
     try {
-      if (images.length <= 0) {
-        throw new Error("No images to convert");
-      }
-
-      setState("uploading");
-
-      const locations = await getPresignedPutUrls.mutateAsync({
-        count: images.length,
-      });
-
-      const uploaded = await Promise.all(
-        images.map(async (image, i) => {
-          const location = locations[i]!;
-
-          const res = await fetch(location.url, {
-            method: "PUT",
-            body: image,
-          });
-
-          if (!res.ok) {
-            throw new Error(
-              `Error in uploading ${image.name} to ${location.url}`,
-            );
-          }
-
-          setProgress((prev) => prev + 99 / images.length);
-
-          return {
-            bucket: location.bucket,
-            key: location.key,
-          };
-        }),
-      );
-
-      setState("converting");
-      const { bucket, key } = await convert.mutateAsync({
-        locations: uploaded.filter((i) => i !== undefined),
-        format,
-      });
-
-      await waitForObject(bucket, key);
-
-      setState("downloading");
-      setProgress(100);
-      const { url } = await getPresignedGetUrl.mutateAsync({
-        bucket: bucket,
-        key: key,
+      const url = await startProcessing(images, JobType.CONVERT, {
+        format: format,
       });
       const res = await fetch(url);
 
@@ -149,9 +66,7 @@ const ConvertPage = () => {
         toast.error(String(e));
       }
     } finally {
-      setProgress(0);
       setImages([]);
-      setState("idle");
     }
   };
 
@@ -168,11 +83,11 @@ const ConvertPage = () => {
           dark:border-neutral-dark"
       >
         <div {...getRootProps()} className="w-full h-full">
-          <Input {...getInputProps()} disabled={state !== "idle"} />
+          <Input {...getInputProps()} disabled={isLoading} />
           <div
             className={`flex flex-col gap-2 w-full items-center justify-center h-full p-10
               hover:bg-secondary-light cursor-pointer transition-colors rounded-lg
-              dark:hover:bg-secondary-dark ${ state !== "idle" &&
+              dark:hover:bg-secondary-dark ${ isLoading &&
               "bg-secondary-light dark:bg-secondary-dark" }`}
           >
             <CloudUploadIcon height={64} width={64} />
@@ -185,11 +100,8 @@ const ConvertPage = () => {
       {images.length > 0 && (
         <div className="flex flex-col md:flex-row gap-2">
           <Menu>
-            <MenuButton
-              className={`${buttonStyles}`}
-              disabled={state !== "idle"}
-            >
-              {state === "idle" ? (
+            <MenuButton className={`${buttonStyles}`} disabled={isLoading}>
+              {!isLoading ? (
                 <>Convert {images.length} images</>
               ) : (
                 <div className="w-full flex flex-col gap-1 items-center transition-all">
@@ -215,15 +127,15 @@ const ConvertPage = () => {
                 data-[closed]:opacity-0 dark:bg-primary-dark/60 dark:text-base-dark
                 dark:border-secondary-dark"
             >
-              {Object.values(ImageFormat).map((format) => (
-                <MenuItem key={format}>
+              {Object.values(ImageFormat).map((i) => (
+                <MenuItem key={i}>
                   <Button
                     className={dropdownStyles}
                     onClick={async () => {
-                      await convertImages(format);
+                      await processImages(i);
                     }}
                   >
-                    {format.toUpperCase()}
+                    {i.toUpperCase()}
                   </Button>
                 </MenuItem>
               ))}

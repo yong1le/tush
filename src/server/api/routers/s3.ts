@@ -43,7 +43,7 @@ export const s3Router = createTRPCRouter({
           }),
         );
         return { exists: true };
-      } catch (error) {
+      } catch {
         return { exists: false };
       }
     }),

@@ -2,16 +2,25 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 import { z } from "zod";
 import { InvokeCommand } from "@aws-sdk/client-lambda";
 import { lambda } from "~/server/aws/lambda";
-import { ImageFormat } from "~/types";
+import {
+  ImageFormat,
+  JobType,
+  UpscaleFactor,
+  type LambdaPayload,
+} from "~/types";
 
 import { env } from "~/env";
 
-export const imageRouter = createTRPCRouter({
-  convert: publicProcedure
+export const lambdaRouter = createTRPCRouter({
+  invoke: publicProcedure
     .input(
       z.object({
+        type: z.nativeEnum(JobType),
+        options: z.union([
+          z.object({ format: z.nativeEnum(ImageFormat) }),
+          z.object({ scale: z.nativeEnum(UpscaleFactor) }),
+        ]),
         locations: z.array(z.object({ bucket: z.string(), key: z.string() })),
-        format: z.nativeEnum(ImageFormat),
       }),
     )
     .mutation(async ({ input }) => {
@@ -25,9 +34,12 @@ export const imageRouter = createTRPCRouter({
             FunctionName: env.AWS_LAMBDA_FN_NAME,
             Payload: JSON.stringify({
               output: { bucket, key },
-              locations: input.locations,
-              format: input.format,
-            }),
+              input: {
+                images: input.locations,
+                type: input.type,
+                options: input.options,
+              },
+            } satisfies LambdaPayload),
           }),
         );
       } catch (e: unknown) {

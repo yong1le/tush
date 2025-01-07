@@ -6,9 +6,9 @@ import { createTRPCRouter, publicProcedure } from "../trpc";
 
 export const userRouter = createTRPCRouter({
   getUser: publicProcedure.query(({ ctx }) => {
-    if (!ctx.session) {
-      return null;
+    if (ctx.session?.user?.id) {
+      return ctx.session.user;
     }
-    return ctx.session.user;
+    return null;
   }),
 });

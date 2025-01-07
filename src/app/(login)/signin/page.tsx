@@ -11,7 +11,7 @@ const SignInPage = () => {
       action={async () => {
         "use server";
 
-        await signIn("github", { redirectTo: "/mockup" });
+        await signIn("github", { redirectTo: "/dashboard" });
       }}
     >
       <div>
