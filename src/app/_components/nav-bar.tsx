@@ -53,12 +53,12 @@ export default async function Navbar() {
             <p className="hidden md:inline">Convert</p>
           </NavbarItem>
         </li>
-        {/* <li> */}
-        {/*   <NavbarItem href="/upscale"> */}
-        {/*     <SquareChevronUpIcon /> */}
-        {/*     <p className="hidden md:inline">Upscale</p> */}
-        {/*   </NavbarItem> */}
-        {/* </li> */}
+        <li>
+          <NavbarItem href="/upscale">
+            <SquareChevronUpIcon />
+            <p className="hidden md:inline">Upscale</p>
+          </NavbarItem>
+        </li>
       </ul>
 
       <ul className="flex flex-row md:flex-col gap-2 shrink-0">

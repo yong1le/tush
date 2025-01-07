@@ -8,7 +8,7 @@ export default function MainLayout({
       <div className="shrink-0">
         <Navbar />
       </div>
-      <div className="flex-1 min-w-0 overflow-auto">{children}</div>
+      <div className="flex-1 min-w-0 overflow-auto m-4 md:m-10">{children}</div>
     </div>
   );
 }

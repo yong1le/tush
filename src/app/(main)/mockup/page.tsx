@@ -121,7 +121,11 @@ const MockupPage = () => {
                   data-[focus]:bg-white/10`;
 
   return (
-    <div className="flex flex-col items-center gap-10 m-4 md:m-10">
+    <div className="flex flex-col items-center gap-10">
+      <div className="text-center flex flex-col gap-2">
+        <h1 className="text-3xl font-bold">Image Mockup</h1>
+        <p>Add device frames around images</p>
+      </div>
       <div
         ref={containerRef}
         className="max-w-[1000px] w-[90%] bg-base-light rounded-lg"

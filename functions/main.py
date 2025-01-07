@@ -15,9 +15,33 @@ format_params = {
     "png": (".png", [cv2.IMWRITE_PNG_COMPRESSION, 6]),
     "jpeg": (".jpg", [cv2.IMWRITE_JPEG_QUALITY, 85]),
     "webp": (".webp", [cv2.IMWRITE_WEBP_QUALITY, 85]),
+    "gif": (".gif", None),
+    "bmp": (".bmp", None),
+    "tiff": (".tiff", None),
+    "ico": (".ico", None),
+    "cur": (".cur", None),
 }
 
-# job_type_map = {"convert": convert_image_format}
+
+def get_format(img_data):
+    if img_data.startswith(b"\xff\xd8"):
+        return "jpeg"
+    elif img_data.startswith(b"\x89PNG\r\n\x1a\n"):
+        return "png"
+    elif img_data.startswith(b"RIFF") and img_data[8:12] == b"WEBP":  # WebP
+        return "webp"
+    elif img_data.startswith(b"GIF87a") or img_data.startswith(b"GIF89a"):
+        return "gif"
+    elif img_data.startswith(b"BM"):
+        return "bmp"
+    elif img_data.startswith(b"MM\x00\x2a") or img_data.startswith(b"II\x2a\x00"):
+        return "tiff"
+    elif img_data.startswith(b"\x00\x00\x01\x00"):
+        return "ico"
+    elif img_data.startswith(b"\x00\x00\x02\x00"):
+        return "cur"
+    else:
+        raise Exception("Unsupported image format")
 
 
 def convert_image_format(
@@ -52,6 +76,42 @@ def convert_image_format(
     return (f"image-{index+1}.{format}", buffer.tobytes())
 
 
+def upscale_image(index: int, location: dict, options: dict) -> tuple[str, bytes]:
+    scale: int = int(options["scale"])
+    bucket = location["bucket"]
+    key = location["key"]
+
+    print(f"converting {key}")
+
+    response = s3_client.get_object(Bucket=bucket, Key=key)
+    img_data = response["Body"].read()
+
+    img_array = np.asarray(bytearray(img_data), dtype=np.uint8)
+    img = cv2.imdecode(img_array, cv2.IMREAD_COLOR)
+
+    # Add these debug prints
+    print(f"Image shape before resize: {img.shape}")
+    print(f"Image dtype before resize: {img.dtype}")
+    print(f"Image range before resize: [{np.min(img)}, {np.max(img)}]")
+
+    print(scale)
+    # Scale the image using cv2.resize
+    img = cv2.resize(img, (0, 0), fx=scale, fy=scale)
+
+    # After resize
+    print(f"Image shape after resize: {img.shape}")
+    print(f"Image dtype after resize: {img.dtype}")
+    print(f"Image range after resize: [{np.min(img)}, {np.max(img)}]")
+
+    ext, params = format_params[get_format(img_data)]
+    success, buffer = cv2.imencode(ext, img, params)
+    if not success:
+        raise Exception(f"Failed to encode image from {key}")
+
+    print(f"converted {key}")
+    return (f"image-{index+1}{ext}", buffer.tobytes())
+
+
 def handler(event, context):
     return asyncio.run(async_handler(event, context))
 
@@ -72,10 +132,15 @@ async def async_handler(event: dict, context):
 
     try:
         conversion_start = time.time()
+        if job_type == "convert":
+            processing_fn = convert_image_format
+        else:
+            processing_fn = upscale_image
+
         with ThreadPoolExecutor() as executor:
             results = list(
                 executor.map(
-                    lambda x: convert_image_format(x[0], x[1], options),
+                    lambda x: processing_fn(x[0], x[1], options),
                     enumerate(locations),
                 )
             )
