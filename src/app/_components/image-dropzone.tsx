@@ -63,20 +63,7 @@ const ImageDropzone = ({ jobType }: { jobType: JobType }) => {
 
   const processImages = async (options: JobOptions) => {
     try {
-      const url = await startProcessing(images, jobType, options);
-      const res = await fetch(url);
-
-      if (!res.ok) {
-        throw new Error("Failed to download zip");
-      }
-
-      const blob = await res.blob();
-      const downloadUrl = window.URL.createObjectURL(blob);
-      const a = document.createElement("a");
-      a.href = downloadUrl;
-      a.download = "converted-images.zip";
-      a.click();
-      window.URL.revokeObjectURL(downloadUrl);
+      await startProcessing(images, jobType, options);
     } catch (e) {
       if (e instanceof Error) {
         toast.error(e.message);

@@ -131,7 +131,19 @@ export const useImageProcessing = () => {
         });
       }
 
-      return url;
+      const res = await fetch(url);
+
+      if (!res.ok) {
+        throw new Error("Failed to download zip");
+      }
+
+      const blob = await res.blob();
+      const downloadUrl = window.URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = downloadUrl;
+      a.download = "download.zip";
+      a.click();
+      window.URL.revokeObjectURL(downloadUrl);
     } catch (e) {
       throw e;
     } finally {
