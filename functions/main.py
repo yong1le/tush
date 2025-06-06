@@ -1,13 +1,14 @@
-import time
-import cv2
+import asyncio
 import io
 import json
-import numpy as np
+import time
+import uuid
 import zipfile
 from concurrent.futures import ThreadPoolExecutor
-import asyncio
+
 import boto3
-import uuid
+import cv2
+import numpy as np
 
 s3_client = boto3.client("s3")
 

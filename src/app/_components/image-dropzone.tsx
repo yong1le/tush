@@ -39,6 +39,11 @@ const ImageDropzone = ({ jobType }: { jobType: JobType }) => {
 
   const { getRootProps, getInputProps } = useDropzone({
     onDrop: onFileInput,
+    accept: {
+      "image/png": [".png"],
+      "image/jpeg": [".jpg", "jpeg"],
+      "image/webp": [".webp"],
+    },
   });
 
   const mapJobType = () => {
