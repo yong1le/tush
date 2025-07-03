@@ -1,5 +1,6 @@
 import { Button } from "@headlessui/react";
 import Link from "next/link";
+import { InfoIcon } from "lucide-react";
 import ThemeSwitch from "~/app/_components/theme-switch";
 
 export default function Home() {
@@ -17,6 +18,16 @@ export default function Home() {
           href="/mockup"
         >
           <Button className="text-xl">Get Started</Button>
+        </Link>
+      </div>
+      <div className="absolute left-10 bottom-10">
+        <Link
+          href="/credits"
+          className="flex items-center gap-2 px-3 py-2 text-sm rounded-lg bg-secondary-light
+            dark:bg-secondary-dark hover:opacity-80 transition-opacity"
+        >
+          <InfoIcon size={16} />
+          <span className="hidden sm:inline">Credits</span>
         </Link>
       </div>
       <div className="absolute right-10 bottom-10">
